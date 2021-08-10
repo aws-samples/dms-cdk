@@ -1,0 +1,32 @@
+{
+  "app": "npx ts-node --prefer-ts-exts bin/dms-cdk.ts",
+  "context": {
+    "environment": "dev",
+    "account": "",
+
+    "dev": {
+      "region": "eu-central-1",
+      "vpcId": "vpc-xxx",
+      "subnetIds": [
+        "subnet-xxx-1",
+        "subnet-xxx-2"
+      ],
+      "vpcSecurityGroupIds": [
+        "sg-xxx"
+      ],
+      "schemas": [
+        {
+          "name": "demo-src-db",
+          "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:111111111111:secret:dev/SourceSecret",
+          "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:111111111111:secret:TargetRDSSecret"
+        }        
+      ],
+      "replicationInstanceClass": "dms.r5.4xlarge",
+      "replicationInstanceIdentifier": "dms-dev-eu",
+      "replicationSubnetGroupIdentifier": "dms-dev-subnet-eu",
+      "replicationTaskSettings": {
+      },
+      "migrationType": "full-load-and-cdc"
+    }         
+  }
+}

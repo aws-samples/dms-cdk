@@ -1,0 +1,38 @@
+{
+  "version": "0.1.0",
+  "main": "index.js",
+  "bin": {
+    "lib-dms-migration": "bin/lib-dms-migration.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "cdk": "cdk"
+  },
+  "devDependencies": {
+    "@aws-cdk/assert": "1.110.0",
+    "@semantic-release/changelog": "5.0.1",
+    "@semantic-release/commit-analyzer": "8.0.1",
+    "@semantic-release/git": "9.0.0",
+    "@types/jest": "26.0.23",
+    "@types/node": "10.17.60",
+    "aws-cdk": "1.110.0",
+    "husky": "4.3.8",
+    "jest": "27.0.5",
+    "lint-staged": "11.0.0",
+    "prettier": "2.3.1",
+    "semantic-release": "17.4.4",
+    "ts-jest": "27.0.3",
+    "ts-node": "9.1.1",
+    "typescript": "4.3.4"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-dms": "1.110.0",
+    "@aws-cdk/aws-ec2": "1.110.0",
+    "@aws-cdk/aws-iam": "1.110.0",
+    "@aws-cdk/aws-sns": "1.110.0",
+    "@aws-cdk/aws-ssm": "1.110.0",
+    "@aws-cdk/core": "1.110.0"
+  }
+}
