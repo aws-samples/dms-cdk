@@ -7,7 +7,7 @@ type DmsProps = cdk.StackProps & {
   context: ContextProps;
 };
 
-export class DmsStack extends cdk.Stack {
+export class DMSStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: DmsProps) {
     super(scope, id, props);
     const context: ContextProps = propsWithDefaults(props.context);

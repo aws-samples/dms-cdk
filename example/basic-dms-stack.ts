@@ -1,10 +1,9 @@
 import * as cdk from '@aws-cdk/core';
 import { DMSReplication } from '../lib/dms-replication';
 import * as ec2 from '@aws-cdk/aws-ec2';
-import { importDependencies } from './dependencies';
 import * as rds from '@aws-cdk/aws-dms';
 
-export class LibDMSStack extends cdk.Stack {
+export class DemoDMSStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -12,19 +11,19 @@ export class LibDMSStack extends cdk.Stack {
 
     const dmsProps = {
       subnetIds: ['subnet-1', 'subnet-2'],
-      replicationSubnetGroupIdentifier: 'dms-subnet-uk',
-      replicationInstanceClass: 'dms-mysql-uk',
-      replicationInstanceIdentifier: 'dms-uk',
+      replicationSubnetGroupIdentifier: 'dms-subnet-private',
+      replicationInstanceClass: 'dms-replication-instance-t3',
+      replicationInstanceIdentifier: 'dms-mysql-dev',
       migrationType: 'full-load',
-      vpcSecurityGroupIds: ['vpc-security'],
+      vpcSecurityGroupIds: ['sg-xxxx'],
       engineName: 'mysql',
       schemas: ['platform'],
-      region: 'us-east-1',
+      region: 'eu-central-1',
     };
 
     const dmsReplication = new DMSReplication(this, 'DMSReplicationService', dmsProps);
     const source = dmsReplication.createMySQLEndpoint(
-      'db-onpprem-source',
+      'db-on-source',
       'source',
       'sourceSecretsManagerSecretId',
       'sourceSecretsManagerRoleArn'

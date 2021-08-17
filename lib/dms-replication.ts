@@ -111,7 +111,6 @@ export class DMSReplication extends cdk.Construct {
     secretId: string,
     secretAccessRoleArn: string
   ): CfnEndpoint {
-    //target endpoint attributes See https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Target.MySQL.html
     const target_extra_conn_attr = 'parallelLoadThreads=1 maxFileSize=512';
 
     const endpoint = new CfnEndpoint(this, 'dms-' + endpointType + '-' + endpointIdentifier, {

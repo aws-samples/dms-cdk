@@ -19,7 +19,7 @@ jest.mock('../lib/resource-importer', () => {
   };
 });
 
-let stack: Dms.DmsStack;
+let stack: Dms.DMSStack;
 
 test('init stack', () => {
   const app = new cdk.App();
@@ -71,7 +71,7 @@ test('init stack', () => {
 
   const dmsProps = { context: contextProps };
 
-  stack = new Dms.DmsStack(app, 'MyDmsStack', dmsProps);
+  stack = new Dms.DMSStack(app, 'MyDmsStack', dmsProps);
 });
 
 test('Test AWS::DMS::ReplicationSubnetGroup', () => {
