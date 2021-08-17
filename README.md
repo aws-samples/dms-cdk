@@ -65,7 +65,7 @@ The solution is primarily designed for RDS MySQL database. However, it can easil
   
 - ContextProps  is a  type that helps to map input parameters from cdk.json file in a type safe manner. The cdk.json file  includes settings related to DMS resources like replication instance, task settings, logging etc.  ContextProps also defines a default values which can be overridden by you by definining it in the cdk.json file 
 
-![!dms-cdk-classes](../docs/../dms-cdk/docs/dms-cdk-classes.png)
+![!dms-cdk-classes](./docs/dms-cdk/docs/dms-cdk-classes.png)
 
 
 ```
