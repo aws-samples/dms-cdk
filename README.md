@@ -6,9 +6,10 @@ This CDK application contains CDK constructs to provision AWS DMS (data migratio
 1. A DMS Replication Instance .
 1. DMS database endpoints (source and target) that is configurable
 1. DMS task(s) for replication that is configurable 
+
 # Pre-requisite
 
-1. Connectivity: DMS needs a network connectivity between the source database and the target database. If the source database in located on-premise ensure port (default 3306 for mysql) is opened by your corporate firewall. For cnonfiguring target endpoint the security should group allow connection from the DMS subnet-group.
+1. Connectivity: DMS needs a network connectivity between the source database and the target database. If the source database in located on-premise ensure port (default 3306 for mysql) is opened by your corporate firewall. For configuring target endpoint ensure that your target RDS security group allows the necessary connectivity. 
 
 1. Secrets Manager to store database credentials : The solution assumes all database creentials are stored in the AWS Secrets manager.Configure the secrets manager for both the source and target databases with necessary parameters like hostname, port, database needed for connectivity. 
 
@@ -19,18 +20,20 @@ This CDK application contains CDK constructs to provision AWS DMS (data migratio
 
 # Solution Architecture
 
-High level architecture for DMS is shown below. The main components are
+High level architecture for DMS is shown below. The main components involved are
 
 1. A dedicated network (VPN or Direct connect) with a connectivity to the customers VPC (Virtual Private Cloud)
 1. Source database preferably with a dedicated slave. This helps to offload the database load coming from read operations during migration.
-1. A target RDS database.
-1. Source and target DMS endpoints with database credentials stored in Secrets Manager
+1. A target RDS database where data is migrated.
+1. Source and target DMS endpoints with database credentials stored in AWS Secrets Manager
 1. DMS replication instance and a number of replication tasks for replicating the data
 
 
 ![DMS Architecture](./docs/dms-architecture.png)
 
 # Installation
+
+Repository: https://github.com/aws-samples/dms-cdk/
 
 1. Install Nodejs and npm. See the link https://nodejs.org/en/download/package-manager/#macos
 
@@ -59,11 +62,11 @@ High level architecture for DMS is shown below. The main components are
 The solution described in this post relies mainly on 2 classes mainly - DMSReplication and DMStack and uses out of the box CDK construct library '@aws-cdk/aws-dms'
 The solution is primarily designed for RDS MySQL database. However, it can easily be adopted or extended for use with other databases like PostgreSQL or Oracle.
  
-- DMSReplication class is a higher-level construct responsible for creating resources such as replication instance, task settings, subnet-group and IAM role for accessing AWS Secrets Manager. Note that all all database credentials are stored in AWS secrets manager.
+- DMSReplication class is construct responsible for creating resources such as replication instance, task settings, subnet-group and IAM role for accessing AWS Secrets Manager. Note that all database credentials are stored in AWS secrets manager.
   
-- DMSStack class is lower-level construct that leverages  DMSReplication to provision the actual  resource(s) based on parameters provided by you via cdk.json
+- DMSStack class is construct that leverages  DMSReplication to provision the actual  resource(s) based on parameters provided by you via cdk.json
   
-- ContextProps  is a  type that helps to map input parameters from cdk.json file in a type safe manner. The cdk.json file  includes settings related to DMS resources like replication instance, task settings, logging etc.  ContextProps also defines a default values which can be overridden by you by definining it in the cdk.json file 
+- ContextProps  is a  type that helps to map input parameters from cdk.json file in a type safe manner. The cdk.json file  includes settings related to DMS resources like replication instance, task settings, logging etc.  ContextProps also defines default values which can be overridden by you by defining it in the cdk.json file 
 
 ![dms-cdk-classes](./docs/dms-cdk-classes.png)
 
@@ -135,6 +138,7 @@ In the cdk.json file you define the DMS related settings.
 
 
 ```
+Example of cdk.json 
 
 "context": {
     "environment": "dev",
