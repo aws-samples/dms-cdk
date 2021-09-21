@@ -56,8 +56,43 @@ Repository: https://github.com/aws-samples/dms-cdk/
    ```
 
 1. Configure cdk.json file
+   
+  ```
+  Example of cdk.json 
 
-1. Deploy the solution to your account
+  "context": {
+      "environment": "dev",
+      "account": "111111111111",
+
+      "dev": {
+        "region": "eu-central-1",
+        "vpcId": "vpc-xxxxxxxxxxxxx",
+        "subnetIds": [
+          "subnet-xxxxxxxxxxxxxxxx",
+          "subnet-xxxxxxxxxxxxxxxx"
+        ],
+        "vpcSecurityGroupIds": [
+          "sg-08a0aa1614c454c63"
+        ],
+        "schemas": [
+          {
+            "name": "demo-src-db",
+            "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:111111111111:secret:dev/mysql/app-p2I4pp",
+            "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:111111111111:secret:dev/mysql/app-p2I4pp"
+          }        
+        ],
+        "replicationInstanceClass": "dms.r5.4xlarge",
+        "replicationInstanceIdentifier": "dms-dev-eu",
+        "replicationSubnetGroupIdentifier": "dms-dev-subnet-eu",
+        "replicationTaskSettings": {
+        },
+        "migrationType": "full-load"
+      }         
+    }
+
+  ```
+
+2. Deploy the solution to your account
    ```
     cdk deploy -c environment="dev" -c account="<YOUR_ACCOUNT_ID>" --profile dms
    ```
@@ -140,41 +175,6 @@ In the cdk.json file you define the DMS related settings.
 | engineName                          | The name of database engine. Only mysql and maridb is allowed                  | mysql         |  n       |
 | publiclyAccessible                  | If the DMS instance is publicly accessible.                                    | false         |  y       |
 
-
-```
-Example of cdk.json 
-
-"context": {
-    "environment": "dev",
-    "account": "111111111111",
-
-    "dev": {
-      "region": "eu-central-1",
-      "vpcId": "vpc-xxxxxxxxxxxxx",
-      "subnetIds": [
-        "subnet-xxxxxxxxxxxxxxxx",
-        "subnet-xxxxxxxxxxxxxxxx"
-      ],
-      "vpcSecurityGroupIds": [
-        "sg-08a0aa1614c454c63"
-      ],
-      "schemas": [
-        {
-          "name": "demo-src-db",
-          "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:111111111111:secret:dev/mysql/app-p2I4pp",
-          "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:111111111111:secret:dev/mysql/app-p2I4pp"
-        }        
-      ],
-      "replicationInstanceClass": "dms.r5.4xlarge",
-      "replicationInstanceIdentifier": "dms-dev-eu",
-      "replicationSubnetGroupIdentifier": "dms-dev-subnet-eu",
-      "replicationTaskSettings": {
-      },
-      "migrationType": "full-load-and-cdc"
-    }         
-  }
-
-```
 
 ## Security
 
