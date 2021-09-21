@@ -48,13 +48,16 @@ Repository: https://github.com/aws-samples/dms-cdk/
       $ aws configure --profile dms
    ```
 
-1. Deploy the solution using the profile created above. Provide the account where DMS resources should be provisioned by CDK .
+1. Compile and test the solution using the profile created above. Provide the account where DMS resources should be provisioned by CDK .
 
    ```
     $ npm install  ( compiles and installes necessary dependencies)
     $ npm test     (runs unit tests)
    ```
-1. Deploy the solution
+
+1. Configure cdk.json file
+
+1. Deploy the solution to your account
    ```
     cdk deploy -c environment="dev" -c account="<YOUR_ACCOUNT_ID>" --profile dms
    ```
@@ -63,9 +66,9 @@ Repository: https://github.com/aws-samples/dms-cdk/
 The solution described in this post relies mainly on 2 classes mainly - DMSReplication and DMStack and uses out of the box CDK construct library '@aws-cdk/aws-dms'
 The solution is primarily designed for RDS MySQL database. However, it can easily be adopted or extended for use with other databases like PostgreSQL or Oracle.
  
-- DMSReplication class is construct responsible for creating resources such as replication instance, task settings, subnet-group and IAM role for accessing AWS Secrets Manager. Note that all database credentials are stored in AWS secrets manager.
+- DMSReplication class is a construct responsible for creating resources such as replication instance, task settings, subnet-group and IAM role for accessing AWS Secrets Manager. Note that all database credentials are stored in AWS secrets manager.
   
-- DMSStack class is construct that leverages  DMSReplication to provision the actual  resource(s) based on parameters provided by you via cdk.json
+- DMSStack class is a construct that leverages  DMSReplication to provision the actual  resource(s) based on parameters provided by you via cdk.json
   
 - ContextProps  is a  type that helps to map input parameters from cdk.json file in a type safe manner. The cdk.json file  includes settings related to DMS resources like replication instance, task settings, logging etc.  ContextProps also defines default values which can be overridden by you by defining it in the cdk.json file 
 
