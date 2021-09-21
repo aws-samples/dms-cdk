@@ -25,7 +25,7 @@ High level architecture for DMS is shown below. The main components involved are
 
 1. A dedicated network (VPN or Direct connect) with a connectivity to the customers VPC (Virtual Private Cloud)
 1. Source database preferably with a dedicated slave. This helps to offload the database load coming from read operations during migration.
-1. A target RDS database instabce where data is migrated.
+1. A target RDS database instance where data is migrated.
 1. Source and target DMS endpoints with database credentials stored in AWS Secrets Manager
 1. DMS replication instance and a number of replication tasks for replicating the data
 
