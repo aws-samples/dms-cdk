@@ -55,7 +55,7 @@ Repository: https://github.com/aws-samples/dms-cdk/
    ```
 1. Deploy the solution
    ```
-    cdk deploy -c environment="dev" -c account="<ACCOUNT TO DEPLOY DMS>" --profile dms
+    cdk deploy -c environment="dev" -c account="<YOUR_ACCOUNT_ID>" --profile dms
    ```
 # CDK construct Overview
 
