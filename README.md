@@ -14,9 +14,10 @@ This CDK application contains CDK constructs to provision AWS DMS (data migratio
 1. Secrets Manager to store database credentials : The solution assumes all database creentials are stored in the AWS Secrets manager.Configure the secrets manager for both the source and target databases with necessary parameters like hostname, port, database needed for connectivity. 
 
 1. VPC endpoints for DMS, Secrets Manager. This ensures traffic is routed via AWS backbone and provides additional security.
-
-1. CDK v1.100.x
-1. Nodejs v 14.x
+1. CDK v1.100.x+
+1. Nodejs v 14.x+
+1. typescript v 2.7
+1. Source and target databases (MySQL v5.7.4+)
 
 # Solution Architecture
 
@@ -24,7 +25,7 @@ High level architecture for DMS is shown below. The main components involved are
 
 1. A dedicated network (VPN or Direct connect) with a connectivity to the customers VPC (Virtual Private Cloud)
 1. Source database preferably with a dedicated slave. This helps to offload the database load coming from read operations during migration.
-1. A target RDS database where data is migrated.
+1. A target RDS database instabce where data is migrated.
 1. Source and target DMS endpoints with database credentials stored in AWS Secrets Manager
 1. DMS replication instance and a number of replication tasks for replicating the data
 
