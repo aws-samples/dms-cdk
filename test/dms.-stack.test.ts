@@ -33,25 +33,25 @@ test('init stack', () => {
     vpcSecurityGroupIds: ['vpc-sg'],
     schemas: [
       {
-        name: 'platform',
+        name: 'Database1',
         sourceSecretsManagerSecretId: 'sourceSecretId',
         sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
-        targetSecretsManagerSecretId: 'targetSecretIdPlatform',
-        targetSecretsManagerRoleArn: 'targetSecretRolePlatform',
+        targetSecretsManagerSecretId: 'targetSecretIdDatabase1',
+        targetSecretsManagerRoleArn: 'targetSecretRoleDatabase1',
       },
       {
-        name: 'solman',
+        name: 'Database2',
         sourceSecretsManagerSecretId: 'sourceSecretId',
         sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
-        targetSecretsManagerSecretId: 'targetSecretIdSolman',
-        targetSecretsManagerRoleArn: 'targetSecretRoleSolman',
+        targetSecretsManagerSecretId: 'targetSecretIdDatabase2',
+        targetSecretsManagerRoleArn: 'targetSecretRoleDatabase2',
       },
       {
-        name: 'archive',
+        name: 'Database3',
         sourceSecretsManagerSecretId: 'sourceSecretId',
         sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
-        targetSecretsManagerSecretId: 'targetSecretIdArchive',
-        targetSecretsManagerRoleArn: 'targetSecretRoleArchive',
+        targetSecretsManagerSecretId: 'targetSecretIdDatabase3',
+        targetSecretsManagerRoleArn: 'targetSecretRoleDatabase3',
       },
     ],
     replicationInstanceClass: 'dms.t3.medium',
@@ -102,24 +102,24 @@ test('Test Target AWS::DMS::Endpoint', () => {
   expect(stack).toHaveResourceLike('AWS::DMS::Endpoint', {
     EndpointType: 'target',
     MySqlSettings: {
-      SecretsManagerAccessRoleArn: 'targetSecretRolePlatform',
-      SecretsManagerSecretId: 'targetSecretIdPlatform',
+      SecretsManagerAccessRoleArn: 'targetSecretRoleDatabase1',
+      SecretsManagerSecretId: 'targetSecretIdDatabase1',
     },
   });
 
   expect(stack).toHaveResourceLike('AWS::DMS::Endpoint', {
     EndpointType: 'target',
     MySqlSettings: {
-      SecretsManagerAccessRoleArn: 'targetSecretRoleSolman',
-      SecretsManagerSecretId: 'targetSecretIdSolman',
+      SecretsManagerAccessRoleArn: 'targetSecretRoleDatabase2',
+      SecretsManagerSecretId: 'targetSecretIdDatabase2',
     },
   });
 
   expect(stack).toHaveResourceLike('AWS::DMS::Endpoint', {
     EndpointType: 'target',
     MySqlSettings: {
-      SecretsManagerAccessRoleArn: 'targetSecretRoleArchive',
-      SecretsManagerSecretId: 'targetSecretIdArchive',
+      SecretsManagerAccessRoleArn: 'targetSecretRoleDatabase3',
+      SecretsManagerSecretId: 'targetSecretIdDatabase3',
     },
   });
 
@@ -130,7 +130,7 @@ test('Test AWS::DMS::ReplicationTask TableMappings', () => {
   expect(stack).toHaveResourceLike('AWS::DMS::ReplicationTask', {
     MigrationType: 'full-load',
     TableMappings:
-      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"platform","table-name":"%"},"rule-action":"include"}]}',
+      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"Database1","table-name":"%"},"rule-action":"include"}]}',
   });
 
   expect(stack).toCountResources('AWS::DMS::ReplicationTask', 3);
