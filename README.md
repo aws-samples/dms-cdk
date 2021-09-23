@@ -146,10 +146,17 @@ Ensure that all pre-requisites are in place. The source code is repository is lo
     cdk deploy --profile dms
    ``` 
 
-1. Post validation : If the deployment is sucessful you will see the cloudformation stack under **AWS Services > Cloudformation** in AWS console.
+1. Post validation : If the deployment is sucessful you will see the cloudformation stack under **AWS Services > Cloudformation** in AWS console. Following resources are created by this deployment.
+  - AWS::DMS::ReplicationSubnetGroup
+  - AWS::DMS::ReplicationInstance
+  - AWS::IAM::Role
+  - AWS::IAM::Policy
+  - AWS::DMS::Endpoint
+  - AWS::DMS::ReplicationTask
+
 # CDK construct Overview
 
-The solution described in this post relies mainly on 2 classes mainly - DMSReplication and DMStack and uses out of the box CDK construct library '@aws-cdk/aws-dms'
+The solution described in this post relies mainly on 2 classes - DMSReplication and DMStack and uses out of the box CDK construct library '@aws-cdk/aws-dms'
 The solution is primarily designed for RDS MySQL database. However, it can easily be adopted or extended for use with other databases like PostgreSQL or Oracle.
  
 - DMSReplication class is a construct responsible for creating resources such as replication instance, task settings, subnet-group and IAM role for accessing AWS Secrets Manager. Note that all database credentials are stored in AWS secrets manager.
@@ -213,7 +220,7 @@ In the cdk.json file you define the DMS related settings.
 | Params                              | Description                                                                    | Default       | Required |
 | ----------------------------------- | :----------------------------------------------------------------------------- | :------------ | -------- |
 | environment                         | Name of your environment to deploy the CDK application                         |   dev         |  y       |        
-| subnetIds                           | Subnet ids of your VPC for creating subnet group for DMS service.              |               |  y       | 
+| subnetIds                           | Subnet ids of your VPC used in creation subnet group for DMS service.          |               |  y       | 
 | replicationInstanceClass            | The type of DMS instance class                                                 | dms.t3.medium |  n       | 
 | replicationSubnetGroupIdentifier    | The identifier of the subnet group where replication instance would be located |               |  n       |
 | replicationInstanceIdentifier       | The unique identifier of the replication instance                              |               |  y       |
