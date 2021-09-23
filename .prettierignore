@@ -1,0 +1,6 @@
+node_modules
+.idea
+cdk.out
+# ignore compiled files
+*.d.ts
+*.js
