@@ -20,7 +20,7 @@ This CDK application contains CDK constructs to provision AWS DMS (data migratio
 
     ```
 
-3. VPC endpoints for DMS, Secrets Manager. This ensures traffic is routed via AWS backbone and provides additional security. (Optional). To check the VPC endpoint run the command below and check for json output for service name like 'com.amazonaws.<aws-region>.dms' and 'com.amazonaws.<aws-region>.secretsmanager'
+3. VPC endpoints for DMS, Secrets Manager. This ensures traffic is routed via AWS backbone and provides additional security. To check the VPC endpoint run the command below and check for json output for service name like 'com.amazonaws.<aws-region>.dms' and 'com.amazonaws.<aws-region>.secretsmanager'
 
     ```
       aws ec2 describe-vpc-endpoints | grep dms
