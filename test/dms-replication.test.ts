@@ -16,7 +16,7 @@ export class DMSTestStack extends cdk.Stack {
   private props: DMSProps;
 
   constructor(scope: cdk.App, id: string) {
-    super(scope, id);
+    super(scope, id, { env: { region: 'us-east-1' } });
 
     const vpc = new ec2.Vpc(this, 'DMSVpc');
     this.props = {

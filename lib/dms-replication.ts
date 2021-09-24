@@ -34,6 +34,7 @@ export class DMSReplication extends cdk.Construct {
     replicationInstance.addDependsOn(subnetGrp);
 
     this.instance = replicationInstance;
+    this.role = this.createRoleForSecretsManager()
   }
 
   /**
@@ -114,7 +115,6 @@ export class DMSReplication extends cdk.Construct {
     secretAccessRoleArn?: string
   ): CfnEndpoint {
     const target_extra_conn_attr = 'parallelLoadThreads=1 maxFileSize=512';
-    this.role = this.createRoleForSecretsManager()
     const roleArn = secretAccessRoleArn == null ? this.role.roleArn : secretAccessRoleArn
     const endpoint = new CfnEndpoint(this, 'dms-' + endpointType + '-' + endpointIdentifier, {
       endpointIdentifier: endpointIdentifier,
