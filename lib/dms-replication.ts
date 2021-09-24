@@ -1,8 +1,9 @@
 import * as cdk from '@aws-cdk/core';
-import { Role, PolicyDocument, PolicyStatement, ServicePrincipal } from '@aws-cdk/aws-iam';
-import * as ec2 from '@aws-cdk/aws-ec2';
 import * as dms from '@aws-cdk/aws-dms';
+import * as ec2 from '@aws-cdk/aws-ec2';
 import { Vpc } from '@aws-cdk/aws-ec2';
+import { TaskSettings } from './context-props';
+import { Role, PolicyDocument, PolicyStatement, ServicePrincipal } from '@aws-cdk/aws-iam';
 import { CfnReplicationSubnetGroup, CfnReplicationInstance, CfnReplicationTask, CfnEndpoint } from '@aws-cdk/aws-dms';
 
 export type DMSProps = {
@@ -20,6 +21,7 @@ export type DMSProps = {
 export class DMSReplication extends cdk.Construct {
   private instance: dms.CfnReplicationInstance;
   private region: string;
+  private role: Role;
 
   constructor(scope: cdk.Construct, id: string, props: DMSProps) {
     super(scope, id);
@@ -109,10 +111,11 @@ export class DMSReplication extends cdk.Construct {
     endpointIdentifier: string,
     endpointType: 'source' | 'target',
     secretId: string,
-    secretAccessRoleArn: string
+    secretAccessRoleArn?: string
   ): CfnEndpoint {
     const target_extra_conn_attr = 'parallelLoadThreads=1 maxFileSize=512';
-
+    this.role = this.createRoleForSecretsManager()
+    const roleArn = secretAccessRoleArn == null ? this.role.roleArn : secretAccessRoleArn
     const endpoint = new CfnEndpoint(this, 'dms-' + endpointType + '-' + endpointIdentifier, {
       endpointIdentifier: endpointIdentifier,
       endpointType: endpointType,
@@ -136,7 +139,7 @@ export class DMSReplication extends cdk.Construct {
     source: CfnEndpoint,
     target: CfnEndpoint,
     migrationType?: 'cdc' | 'full-load' | 'full-load-and-cdc',
-    replicationTaskSettings?: string
+    replicationTaskSettings?: TaskSettings
   ): CfnReplicationTask {
     const replicationTask = new CfnReplicationTask(this, replicationTaskIdentifier, {
       replicationInstanceArn: this.instance.ref,
@@ -144,7 +147,7 @@ export class DMSReplication extends cdk.Construct {
       migrationType: migrationType || 'full-load',
       sourceEndpointArn: source.ref,
       targetEndpointArn: target.ref,
-      replicationTaskSettings: replicationTaskSettings,
+      replicationTaskSettings: JSON.stringify(replicationTaskSettings),
       tableMappings: JSON.stringify({
         rules: [
           {

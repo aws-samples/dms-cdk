@@ -2,6 +2,7 @@ import * as cdk from '@aws-cdk/core';
 import { ContextProps } from './context-props';
 import { Role, ServicePrincipal, ManagedPolicy } from '@aws-cdk/aws-iam';
 import { DMSReplication } from '..';
+import { Stack } from '@aws-cdk/core';
 
 type DmsProps = cdk.StackProps & {
   context: ContextProps;
@@ -17,31 +18,28 @@ export class DMSStack extends cdk.Stack {
       replicationSubnetGroupIdentifier: context.replicationSubnetGroupIdentifier,
       replicationInstanceClass: context.replicationInstanceClass,
       replicationInstanceIdentifier: context.replicationInstanceIdentifier,
-      replicationTaskSettings: context.replicationTaskSettings,
-      migrationType: context.migrationType,
       vpcSecurityGroupIds: context.vpcSecurityGroupIds,
-      schemas: context.schemas,
       engineName: 'mysql',
-      region: String(props.env?.region),
+      region: Stack.of(this).region,
     };
 
     const dmsReplication = new DMSReplication(this, 'Replication', dmsProps);
     const suffix = context.replicationInstanceIdentifier;
-    const role = dmsReplication.createRoleForSecretsManager();
+
 
     context.schemas.forEach(schema => {
       const source = dmsReplication.createMySQLEndpoint(
         'source-' + schema.name + '-' + suffix,
         'source',
         schema.sourceSecretsManagerSecretId,
-        schema.sourceSecretsManagerRoleArn == null ? role.roleArn : schema.sourceSecretsManagerRoleArn
+        schema.sourceSecretsManagerRoleArn
       );
 
       const target = dmsReplication.createMySQLEndpoint(
         'target-' + schema.name + '-' + suffix,
         'target',
         schema.targetSecretsManagerSecretId,
-        schema.targetSecretsManagerRoleArn == null ? role.roleArn : schema.targetSecretsManagerRoleArn
+        schema.targetSecretsManagerRoleArn
       );
 
       dmsReplication.createReplicationTask(
@@ -49,8 +47,8 @@ export class DMSStack extends cdk.Stack {
         schema.name,
         source,
         target,
-        dmsProps.migrationType,
-        JSON.stringify(dmsProps.replicationTaskSettings)
+        context.migrationType,
+        context.replicationTaskSettings
       );
     });
   }

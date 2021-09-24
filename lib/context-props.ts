@@ -7,10 +7,7 @@ export type ContextProps = {
    * This property is populated by code
    */
   account: string;
-  /**
-   * Target AWS region where CDK is provisioning the resources
-   */
-  region: string;
+
   /**
    * Target VPC where CDK is provisioning the RDS instances and Security Groups
    */

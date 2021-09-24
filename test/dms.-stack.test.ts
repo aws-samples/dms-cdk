@@ -27,7 +27,6 @@ test('init stack', () => {
   const contextProps: ContextProps = {
     environment: 'dev',
     account: '',
-    region: '',
     vpcId: 'test-vpc',
     subnetIds: ['subnet-1', 'subnet-2'],
     vpcSecurityGroupIds: ['vpc-sg'],

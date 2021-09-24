@@ -1,7 +1,8 @@
 import * as cdk from '@aws-cdk/core';
-import { DMSReplication } from '../lib/dms-replication';
+import { Stack } from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2';
 import * as rds from '@aws-cdk/aws-dms';
+import { DMSReplication } from '../lib/dms-replication';
 
 export class DemoDMSStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -14,11 +15,9 @@ export class DemoDMSStack extends cdk.Stack {
       replicationSubnetGroupIdentifier: 'dms-subnet-private',
       replicationInstanceClass: 'dms-replication-instance-t3',
       replicationInstanceIdentifier: 'dms-mysql-dev',
-      migrationType: 'full-load',
       vpcSecurityGroupIds: ['sg-xxxx'],
       engineName: 'mysql',
-      schemas: ['platform'],
-      region: 'eu-central-1',
+      region: Stack.of(this).region
     };
 
     const dmsReplication = new DMSReplication(this, 'DMSReplicationService', dmsProps);
