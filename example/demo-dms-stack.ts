@@ -1,7 +1,6 @@
-import * as cdk from '@aws-cdk/core';
-import { Stack } from '@aws-cdk/core';
-import * as ec2 from '@aws-cdk/aws-ec2';
-import * as rds from '@aws-cdk/aws-dms';
+import * as cdk from 'aws-cdk-lib';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as rds from 'aws-cdk-lib/aws-dms';
 import { DMSReplication } from '../lib/dms-replication';
 
 export class DemoDMSStack extends cdk.Stack {
@@ -17,21 +16,19 @@ export class DemoDMSStack extends cdk.Stack {
       replicationInstanceIdentifier: 'dms-mysql-dev',
       vpcSecurityGroupIds: ['sg-xxxx'],
       engineName: 'mysql',
-      region: Stack.of(this).region
+      region: cdk.Stack.of(this).region
     };
 
     const dmsReplication = new DMSReplication(this, 'DMSReplicationService', dmsProps);
     const source = dmsReplication.createMySQLEndpoint(
       'db-on-source',
       'source',
-      'sourceSecretsManagerSecretId',
-      'sourceSecretsManagerRoleArn'
+      'sourceSecretsManagerSecretId'
     );
     const target = dmsReplication.createMySQLEndpoint(
       'rds-target',
       'target',
-      'targetSecretsManagerSecretId',
-      'targetSecretsManagerRoleArn'
+      'targetSecretsManagerSecretId'
     );
 
     dmsReplication.createReplicationTask('platform-replication-task', 'platform', source, target);

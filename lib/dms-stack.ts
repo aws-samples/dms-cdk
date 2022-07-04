@@ -1,15 +1,15 @@
-import * as cdk from '@aws-cdk/core';
+import * as cdk from 'aws-cdk-lib';
 import { ContextProps } from './context-props';
-import { Role, ServicePrincipal, ManagedPolicy } from '@aws-cdk/aws-iam';
+import { Role, ServicePrincipal, ManagedPolicy } from 'aws-cdk-lib/aws-iam';
 import { DMSReplication } from '..';
-import { Stack } from '@aws-cdk/core';
+import { Construct } from 'constructs';
 
 type DmsProps = cdk.StackProps & {
   context: ContextProps;
 };
 
 export class DMSStack extends cdk.Stack {
-  constructor(scope: cdk.Construct, id: string, props: DmsProps) {
+  constructor(scope: Construct, id: string, props: DmsProps) {
     super(scope, id, props);
     const context: ContextProps = propsWithDefaults(props.context);
 
@@ -20,26 +20,26 @@ export class DMSStack extends cdk.Stack {
       replicationInstanceIdentifier: context.replicationInstanceIdentifier,
       vpcSecurityGroupIds: context.vpcSecurityGroupIds,
       engineName: 'mysql',
-      region: Stack.of(this).region,
+      region: cdk.Stack.of(this).region,
+      engineVersion: context.engineVersion ? context.engineVersion : '3.4.6'
     };
 
     const dmsReplication = new DMSReplication(this, 'Replication', dmsProps);
     const suffix = context.replicationInstanceIdentifier;
 
 
+    //Creates DMS Task for each schema
     context.schemas.forEach(schema => {
       const source = dmsReplication.createMySQLEndpoint(
         'source-' + schema.name + '-' + suffix,
         'source',
-        schema.sourceSecretsManagerSecretId,
-        schema.sourceSecretsManagerRoleArn
+        schema.sourceSecretsManagerSecretId
       );
 
       const target = dmsReplication.createMySQLEndpoint(
         'target-' + schema.name + '-' + suffix,
         'target',
-        schema.targetSecretsManagerSecretId,
-        schema.targetSecretsManagerRoleArn
+        schema.targetSecretsManagerSecretId
       );
 
       dmsReplication.createReplicationTask(

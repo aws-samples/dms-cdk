@@ -54,6 +54,9 @@ export type ContextProps = {
    * See https://docs.aws.amazon.com/dms/latest/userguide/CHAP_Tasks.CustomizingTasks.TaskSettings.html
    */
   replicationTaskSettings?: TaskSettings;
+
+  /** DMS Engine Version */
+  engineVersion?: '3.4.6' | '3.4.7';
 };
 
 export type SchemaConfig = {
