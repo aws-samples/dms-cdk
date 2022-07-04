@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { DMSStack } from '../lib/dms-stack';
 import { ContextProps } from '../lib/context-props';
+import DmsStack from '../lib/dms-stack';
 
 const app = new cdk.App();
 
@@ -12,7 +12,7 @@ context.environment = environment;
 const account = app.node.tryGetContext('account');
 context.account = account;
 
-new DMSStack(app, 'DmsStack', {
+new DmsStack(app, 'DmsStack', {
   context,
   env: {
     account: context.account,
