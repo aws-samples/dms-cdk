@@ -1,8 +1,14 @@
+/* eslint-disable camelcase */
 import * as dms from 'aws-cdk-lib/aws-dms';
-import { TaskSettings } from './context-props';
-import { Role, PolicyDocument, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { CfnReplicationSubnetGroup, CfnReplicationInstance, CfnReplicationTask, CfnEndpoint } from 'aws-cdk-lib/aws-dms';
+import { Role, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import {
+  CfnReplicationSubnetGroup,
+  CfnReplicationInstance,
+  CfnReplicationTask,
+  CfnEndpoint,
+} from 'aws-cdk-lib/aws-dms';
 import { Construct } from 'constructs';
+import { TaskSettings } from './context-props';
 
 export type DMSProps = {
   subnetIds: string[];
@@ -12,24 +18,46 @@ export type DMSProps = {
   vpcSecurityGroupIds: string[];
   allocatedStorage?: number;
   engineName?: string;
-  publiclyAccessible?: false;
+  publiclyAccessible?: boolean;
   region: string;
   engineVersion?: string;
 };
 
-export class DMSReplication extends Construct {
+/**
+ * Returns default sets of properties
+ *
+ * @param props
+ * @returns
+ */
+function getPropsWithDefaults(props: DMSProps) {
+  const propsWithDefaults = {
+    replicationInstanceClass: 'dms.t3.medium',
+    sourceDBPort: 3306,
+    targetDBPort: 3306,
+    allocatedStorage: 50,
+    engineName: 'mysql' || 'mariadb' || 'oracle',
+    publiclyAccessible: false,
+    engineVersion: '3.4.6',
+    ...props,
+  };
+
+  return propsWithDefaults;
+}
+class DMSReplication extends Construct {
   private instance: dms.CfnReplicationInstance;
+
   private region: string;
+
   private secretsManagerAccessRole: Role;
 
   constructor(scope: Construct, id: string, props: DMSProps) {
     super(scope, id);
 
-    props = getPropsWithDefaults(props);
+    const resolvedProps = getPropsWithDefaults(props);
     const subnetGrp = this.createSubnetGroup(props);
     this.region = props.region;
     this.secretsManagerAccessRole = this.createRoleForSecretsManagerAccess();
-    const replicationInstance = this.createReplicationInstance(props);
+    const replicationInstance = this.createReplicationInstance(resolvedProps);
     replicationInstance.addDependsOn(subnetGrp);
 
     this.instance = replicationInstance;
@@ -58,7 +86,7 @@ export class DMSReplication extends Construct {
    */
   public createRoleForSecretsManagerAccess(): Role {
     const role = new Role(this, 'dms-secretsmgr-access-role', {
-      assumedBy: new ServicePrincipal('dms.' + this.region + '.amazonaws.com'),
+      assumedBy: new ServicePrincipal(`dms.${this.region}.amazonaws.com`),
     });
 
     role.addToPolicy(
@@ -91,7 +119,7 @@ export class DMSReplication extends Construct {
       vpcSecurityGroupIds: props.vpcSecurityGroupIds,
       allocatedStorage: props.allocatedStorage,
       publiclyAccessible: props.publiclyAccessible,
-      engineVersion: props.engineVersion
+      engineVersion: props.engineVersion,
     });
 
     return instance;
@@ -112,12 +140,60 @@ export class DMSReplication extends Construct {
     secretId: string
   ): CfnEndpoint {
     const target_extra_conn_attr = 'parallelLoadThreads=1 maxFileSize=512';
-    const endpoint = new CfnEndpoint(this, 'dms-' + endpointType + '-' + endpointIdentifier, {
-      endpointIdentifier: endpointIdentifier,
-      endpointType: endpointType,
+    const endpoint = new CfnEndpoint(this, `mysql-${endpointType}-${endpointIdentifier}`, {
+      endpointIdentifier,
+      endpointType,
       engineName: 'mysql',
-      mySqlSettings: { secretsManagerAccessRoleArn: this.secretsManagerAccessRole.roleArn, secretsManagerSecretId: secretId },
-      extraConnectionAttributes: endpointType == 'source' ? 'parallelLoadThreads=1' : target_extra_conn_attr,
+      mySqlSettings: {
+        secretsManagerAccessRoleArn: this.secretsManagerAccessRole.roleArn,
+        secretsManagerSecretId: secretId,
+      },
+      extraConnectionAttributes: endpointType === 'source' ? 'parallelLoadThreads=1' : target_extra_conn_attr,
+    });
+
+    return endpoint;
+  }
+
+  public createOracleEndpoint(
+    endpointIdentifier: string,
+    endpointType: 'source' | 'target',
+    secretId: string,
+    databaseName: string
+  ): CfnEndpoint {
+    const target_extra_conn_attr =
+      'useLogMinerReader=N;useBfile=Y;failTasksOnLobTruncation=true;numberDataTypeScale=-2';
+    const endpoint = new CfnEndpoint(this, `oracle-${endpointType}-${databaseName}-${endpointIdentifier}`, {
+      endpointIdentifier,
+      endpointType,
+      engineName: 'oracle',
+      databaseName,
+      oracleSettings: {
+        secretsManagerAccessRoleArn: this.secretsManagerAccessRole.roleArn,
+        secretsManagerSecretId: secretId,
+      },
+      extraConnectionAttributes: endpointType === 'source' ? 'addSupplementalLogging=true' : target_extra_conn_attr,
+    });
+
+    return endpoint;
+  }
+
+  public createAuroraPostgresEndpoint(
+    endpointIdentifier: string,
+    endpointType: 'source' | 'target',
+    secretId: string,
+    databaseName: string
+  ): CfnEndpoint {
+    const target_extra_conn_attr = 'executeTimeout=180';
+    const endpoint = new CfnEndpoint(this, `aurora-postgresql-${endpointType}-${databaseName}-${endpointIdentifier}`, {
+      endpointIdentifier,
+      endpointType,
+      engineName: 'aurora-postgresql',
+      databaseName,
+      postgreSqlSettings: {
+        secretsManagerAccessRoleArn: this.secretsManagerAccessRole.roleArn,
+        secretsManagerSecretId: secretId,
+      },
+      extraConnectionAttributes: endpointType === 'source' ? 'heartbeatFrequency=5' : target_extra_conn_attr,
     });
 
     return endpoint;
@@ -139,7 +215,7 @@ export class DMSReplication extends Construct {
   ): CfnReplicationTask {
     const replicationTask = new CfnReplicationTask(this, replicationTaskIdentifier, {
       replicationInstanceArn: this.instance.ref,
-      replicationTaskIdentifier: replicationTaskIdentifier,
+      replicationTaskIdentifier,
       migrationType: migrationType || 'full-load',
       sourceEndpointArn: source.ref,
       targetEndpointArn: target.ref,
@@ -164,26 +240,4 @@ export class DMSReplication extends Construct {
   }
 }
 
-/**
- * Returns default sets of properties
- *
- * @param props
- * @returns
- */
-function getPropsWithDefaults(props: DMSProps): DMSProps {
-  const propsWithDefaults = Object.assign(
-    {
-      replicationInstanceClass: 'dms.t3.medium',
-      replicationSubnetGroupIdentifier: 'default-subnet-group',
-      sourceDBPort: 3306,
-      targetDBPort: 3306,
-      allocatedStorage: 50,
-      engineName: 'mysql' || 'mariadb' || 'oracle',
-      publiclyAccessible: false,
-      engineVersion: '3.4.6'
-    },
-    props
-  );
-
-  return propsWithDefaults;
-}
+export default DMSReplication;

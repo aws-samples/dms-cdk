@@ -2,7 +2,7 @@
   "version": "0.1.0",
   "main": "index.js",
   "bin": {
-    "lib-dms-migration": "bin/lib-dms-migration.js"
+    "dms-cdk": "bin/dms-cdk.js"
   },
   "scripts": {
     "build": "tsc",
