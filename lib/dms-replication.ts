@@ -1,10 +1,8 @@
-import * as cdk from '@aws-cdk/core';
-import * as dms from '@aws-cdk/aws-dms';
-import * as ec2 from '@aws-cdk/aws-ec2';
-import { Vpc } from '@aws-cdk/aws-ec2';
+import * as dms from 'aws-cdk-lib/aws-dms';
 import { TaskSettings } from './context-props';
-import { Role, PolicyDocument, PolicyStatement, ServicePrincipal } from '@aws-cdk/aws-iam';
-import { CfnReplicationSubnetGroup, CfnReplicationInstance, CfnReplicationTask, CfnEndpoint } from '@aws-cdk/aws-dms';
+import { Role, PolicyDocument, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { CfnReplicationSubnetGroup, CfnReplicationInstance, CfnReplicationTask, CfnEndpoint } from 'aws-cdk-lib/aws-dms';
+import { Construct } from 'constructs';
 
 export type DMSProps = {
   subnetIds: string[];
@@ -16,25 +14,25 @@ export type DMSProps = {
   engineName?: string;
   publiclyAccessible?: false;
   region: string;
+  engineVersion?: string;
 };
 
-export class DMSReplication extends cdk.Construct {
+export class DMSReplication extends Construct {
   private instance: dms.CfnReplicationInstance;
   private region: string;
-  private role: Role;
+  private secretsManagerAccessRole: Role;
 
-  constructor(scope: cdk.Construct, id: string, props: DMSProps) {
+  constructor(scope: Construct, id: string, props: DMSProps) {
     super(scope, id);
 
     props = getPropsWithDefaults(props);
     const subnetGrp = this.createSubnetGroup(props);
     this.region = props.region;
-
+    this.secretsManagerAccessRole = this.createRoleForSecretsManagerAccess();
     const replicationInstance = this.createReplicationInstance(props);
     replicationInstance.addDependsOn(subnetGrp);
 
     this.instance = replicationInstance;
-    this.role = this.createRoleForSecretsManager()
   }
 
   /**
@@ -58,7 +56,7 @@ export class DMSReplication extends cdk.Construct {
    *
    * @returns
    */
-  public createRoleForSecretsManager(): Role {
+  public createRoleForSecretsManagerAccess(): Role {
     const role = new Role(this, 'dms-secretsmgr-access-role', {
       assumedBy: new ServicePrincipal('dms.' + this.region + '.amazonaws.com'),
     });
@@ -93,7 +91,7 @@ export class DMSReplication extends cdk.Construct {
       vpcSecurityGroupIds: props.vpcSecurityGroupIds,
       allocatedStorage: props.allocatedStorage,
       publiclyAccessible: props.publiclyAccessible,
-      engineVersion: '3.4.4',
+      engineVersion: props.engineVersion
     });
 
     return instance;
@@ -111,16 +109,14 @@ export class DMSReplication extends cdk.Construct {
   public createMySQLEndpoint(
     endpointIdentifier: string,
     endpointType: 'source' | 'target',
-    secretId: string,
-    secretAccessRoleArn?: string
+    secretId: string
   ): CfnEndpoint {
     const target_extra_conn_attr = 'parallelLoadThreads=1 maxFileSize=512';
-    const roleArn = secretAccessRoleArn == null ? this.role.roleArn : secretAccessRoleArn
     const endpoint = new CfnEndpoint(this, 'dms-' + endpointType + '-' + endpointIdentifier, {
       endpointIdentifier: endpointIdentifier,
       endpointType: endpointType,
       engineName: 'mysql',
-      mySqlSettings: { secretsManagerAccessRoleArn: secretAccessRoleArn, secretsManagerSecretId: secretId },
+      mySqlSettings: { secretsManagerAccessRoleArn: this.secretsManagerAccessRole.roleArn, secretsManagerSecretId: secretId },
       extraConnectionAttributes: endpointType == 'source' ? 'parallelLoadThreads=1' : target_extra_conn_attr,
     });
 
@@ -182,8 +178,9 @@ function getPropsWithDefaults(props: DMSProps): DMSProps {
       sourceDBPort: 3306,
       targetDBPort: 3306,
       allocatedStorage: 50,
-      engineName: 'mysql' || 'mariadb',
+      engineName: 'mysql' || 'mariadb' || 'oracle',
       publiclyAccessible: false,
+      engineVersion: '3.4.6'
     },
     props
   );

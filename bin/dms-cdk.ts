@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import * as cdk from '@aws-cdk/core';
+import * as cdk from 'aws-cdk-lib';
 import { DMSStack } from '../lib/dms-stack';
 import { ContextProps } from '../lib/context-props';
 

@@ -1,15 +1,14 @@
-import { expect as expectCDK, haveResource, NegatedAssertion } from '@aws-cdk/assert';
-import * as cdk from '@aws-cdk/core';
-import '@aws-cdk/assert/jest';
-import assert = require('assert');
-import * as ec2 from '@aws-cdk/aws-ec2';
-import * as dms from '@aws-cdk/aws-dms';
+import * as cdk from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DMSProps, DMSReplication } from '../lib/dms-replication';
-import { SynthUtils } from '@aws-cdk/assert';
 import { ContextProps, TaskSettings } from '../lib/context-props';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as Dms from '../lib/dms-stack';
 
+
 let stack: DMSTestStack;
+let template : Template;
 
 export class DMSTestStack extends cdk.Stack {
   public dmsReplication: DMSReplication;
@@ -27,128 +26,93 @@ export class DMSTestStack extends cdk.Stack {
       vpcSecurityGroupIds: ['vpc-security'],
       engineName: 'mysql',
       region: 'us-east-1',
+      engineVersion: '3.4.7'
     };
 
     this.dmsReplication = new DMSReplication(this, 'DMSReplicationService', this.props);
+
+    const source = this.dmsReplication.createMySQLEndpoint(
+      'db-on-source',
+      'source',
+      'sourceSecretsManagerSecretId'
+    );
+    const target = this.dmsReplication.createMySQLEndpoint(
+      'rds-target',
+      'target',
+      'targetSecretsManagerSecretId'
+    );
+
+    this.dmsReplication.createReplicationTask('test-replication-task', 'platform', source, target);
   }
 }
 
 test('init stack', () => {
   const app = new cdk.App();
-  // WHEN
   stack = new DMSTestStack(app, 'DMSTestStack');
-  assert(stack.stackName, 'DMSTestStack');
+  template = Template.fromStack(stack);
 });
 
 test('should have AWS::DMS::ReplicationInstance', () => {
-  expect(stack).toHaveResource('AWS::DMS::ReplicationInstance', {
+  template.hasResourceProperties('AWS::DMS::ReplicationInstance', {
     ReplicationInstanceClass: 'dms-mysql-uk',
     ReplicationInstanceIdentifier: 'test-repl-01',
     AllocatedStorage: 50,
     VpcSecurityGroupIds: ['vpc-security'],
+    EngineVersion: '3.4.7'
   });
 });
 
-test('should have depends on in AWS::DMS::ReplicationInstance', () => {
-  const { Resources } = SynthUtils.toCloudFormation(stack);
-
-  //filters out ReplicationInstance from json
-  const [repInstance1] = Object.keys(Resources)
-    .map(resId => {
-      return Resources[resId];
-    })
-    .filter(res => res.Type === 'AWS::DMS::ReplicationInstance');
-
-  expect(repInstance1.DependsOn).toHaveLength(1);
-});
 
 test('should have AWS::DMS::ReplicationSubnetGroup', () => {
-  expect(stack).toHaveResource('AWS::DMS::ReplicationSubnetGroup', {
+  template.hasResourceProperties('AWS::DMS::ReplicationSubnetGroup', {
     ReplicationSubnetGroupIdentifier: 'subnet-group',
   });
 });
 
 test('should allocated storage AWS::DMS::ReplicationInstance', () => {
-  expect(stack).toHaveResource('AWS::DMS::ReplicationInstance', {
+  template.hasResourceProperties('AWS::DMS::ReplicationInstance', {
     ReplicationInstanceClass: 'dms-mysql-uk',
     AllocatedStorage: 50,
   });
 });
 
-test('test create endpoint', () => {
+
+test('test target endpoint created with correct attributes', () => {
+
   // Create source endpoint
   const sourceEndpoint = stack.dmsReplication.createMySQLEndpoint(
     'src-endpoint-1',
     'source',
-    'srcSecretRoleARN',
-    'srcSecret'
+    'sourceSecretId'
   );
 
-  // Create target endpoint
-  const targetEndpoint = stack.dmsReplication.createMySQLEndpoint(
-    'tgt-endpoint-2',
-    'target',
-    'targetSecretRoleARN',
-    'targetSecret'
-  );
-  expect(stack).toCountResources('AWS::DMS::Endpoint', 2);
-  expect(stack).toHaveResource('AWS::DMS::Endpoint');
-  assert(sourceEndpoint.ref.length > 0);
-  assert(targetEndpoint.ref.length > 0);
-});
+  template.hasResourceProperties('AWS::DMS::Endpoint', {
+    EndpointType: 'source',
+    EngineName: 'mysql',
+    ExtraConnectionAttributes: 'parallelLoadThreads=1',
+    MySqlSettings: {
+      SecretsManagerSecretId: 'sourceSecretsManagerSecretId'
+     }
+  });
 
-test('test target endpoint has Foreign key disabled', () => {
   // Create target endpoint
   const targetEndpoint = stack.dmsReplication.createMySQLEndpoint(
     'tgt-endpoint-3',
     'target',
-    'targetSecretRoleARN',
     'targetSecret'
   );
-  expect(stack).toHaveResourceLike('AWS::DMS::Endpoint', {
+
+  template.hasResourceProperties('AWS::DMS::Endpoint', {
+    EndpointType: 'target',
     ExtraConnectionAttributes: 'parallelLoadThreads=1 maxFileSize=512',
   });
 });
 
 test('test create replication task', () => {
-  // Create source endpoint
-  const sourceEndpoint = stack.dmsReplication.createMySQLEndpoint(
-    'src-endpoint-3',
-    'source',
-    'srcSecretRoleARN',
-    'srcSecret'
-  );
-
-  // Create target endpoint
-  const targetEndpoint = stack.dmsReplication.createMySQLEndpoint(
-    'tgt-endpoint-4',
-    'target',
-    'targetSecretRoleARN',
-    'targetSecret'
-  );
-
-  stack.dmsReplication.createReplicationTask('replication-task', 'platform', sourceEndpoint, targetEndpoint);
-  expect(stack).toHaveResourceLike('AWS::DMS::ReplicationTask', {
+ template.hasResourceProperties('AWS::DMS::ReplicationTask', {
     MigrationType: 'full-load',
-    ReplicationTaskIdentifier: 'replication-task',
-  });
-
-  expect(stack).toHaveResourceLike('AWS::DMS::ReplicationTask', {
+    ReplicationTaskIdentifier: 'test-replication-task',
     TableMappings:
       '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"platform","table-name":"%"},"rule-action":"include"}]}',
   });
-});
-
-jest.mock('../lib/resource-importer', () => {
-  return {
-    ResourceImporter: jest.fn().mockImplementation(() => {
-      return {
-        getVpc: (vpcId: string, scope: cdk.Construct) => {
-          return new ec2.Vpc(scope, vpcId, {
-            cidr: '10.2.0.0/16',
-          });
-        },
-      };
-    }),
-  };
 });
