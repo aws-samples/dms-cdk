@@ -1,19 +1,8 @@
 /* eslint-disable jest/expect-expect */
 import * as cdk from 'aws-cdk-lib';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import { Construct } from 'constructs';
 import { Template } from 'aws-cdk-lib/assertions';
 import DmsStack from '../lib/dms-stack';
 import { ContextProps } from '../lib/context-props';
-
-jest.mock('../lib/resource-importer', () => ({
-  ResourceImporter: jest.fn().mockImplementation(() => ({
-    getVpc: (vpcId: string, scope: Construct) =>
-      new ec2.Vpc(scope, vpcId, {
-        cidr: '10.2.0.0/16',
-      }),
-  })),
-}));
 
 let stack: DmsStack;
 let template: Template;

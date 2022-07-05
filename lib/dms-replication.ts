@@ -10,7 +10,7 @@ import {
 import { Construct } from 'constructs';
 import { TaskSettings } from './context-props';
 
-export type DMSProps = {
+export type DmsProps = {
   subnetIds: string[];
   replicationInstanceClass?: string;
   replicationInstanceIdentifier: string;
@@ -29,13 +29,13 @@ export type DMSProps = {
  * @param props
  * @returns
  */
-function getPropsWithDefaults(props: DMSProps) {
+function getPropsWithDefaults(props: DmsProps) {
   const propsWithDefaults = {
     replicationInstanceClass: 'dms.t3.medium',
     sourceDBPort: 3306,
     targetDBPort: 3306,
     allocatedStorage: 50,
-    engineName: 'mysql' || 'mariadb' || 'oracle',
+    engineName: 'mysql',
     publiclyAccessible: false,
     engineVersion: '3.4.6',
     ...props,
@@ -43,14 +43,14 @@ function getPropsWithDefaults(props: DMSProps) {
 
   return propsWithDefaults;
 }
-class DMSReplication extends Construct {
+class DmsReplication extends Construct {
   private instance: dms.CfnReplicationInstance;
 
   private region: string;
 
   private secretsManagerAccessRole: Role;
 
-  constructor(scope: Construct, id: string, props: DMSProps) {
+  constructor(scope: Construct, id: string, props: DmsProps) {
     super(scope, id);
 
     const resolvedProps = getPropsWithDefaults(props);
@@ -70,7 +70,7 @@ class DMSReplication extends Construct {
    * @param subnetIds
    * @returns
    */
-  public createSubnetGroup(props: DMSProps): CfnReplicationSubnetGroup {
+  public createSubnetGroup(props: DmsProps): CfnReplicationSubnetGroup {
     const subnet = new CfnReplicationSubnetGroup(this, 'dms-subnet-group', {
       replicationSubnetGroupIdentifier: props.replicationSubnetGroupIdentifier,
       replicationSubnetGroupDescription: 'Private subnets that have access to my data source and target',
@@ -107,11 +107,10 @@ class DMSReplication extends Construct {
   /**
    * Creates replication instance where DMS replication tasks runs.
    *
-   * @param id
-   * @param subnet
-   * @returns CfnReplicationInstance Replication Instance
+   * @param props
+   * @returns
    */
-  private createReplicationInstance(props: DMSProps): CfnReplicationInstance {
+  private createReplicationInstance(props: DmsProps): CfnReplicationInstance {
     const instance = new CfnReplicationInstance(this, 'dms-replication-instance', {
       replicationInstanceClass: props.replicationInstanceClass || 'dms.t3.medium',
       replicationSubnetGroupIdentifier: props.replicationSubnetGroupIdentifier,
@@ -240,4 +239,4 @@ class DMSReplication extends Construct {
   }
 }
 
-export default DMSReplication;
+export default DmsReplication;
