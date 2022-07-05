@@ -17,10 +17,11 @@ export type DmsProps = {
   replicationSubnetGroupIdentifier: string;
   vpcSecurityGroupIds: string[];
   allocatedStorage?: number;
-  engineName?: string;
   publiclyAccessible?: boolean;
   region: string;
   engineVersion?: string;
+  engineName?: string;
+  targetEngineName?: string;
 };
 
 /**
@@ -36,6 +37,7 @@ function getPropsWithDefaults(props: DmsProps) {
     targetDBPort: 3306,
     allocatedStorage: 50,
     engineName: 'mysql',
+    targetEngineName: 'aurora-postgresql',
     publiclyAccessible: false,
     engineVersion: '3.4.6',
     ...props,

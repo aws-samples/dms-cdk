@@ -26,7 +26,10 @@
       "replicationSubnetGroupIdentifier": "dms-dev-subnet-eu",
       "replicationTaskSettings": {
       },
-      "migrationType": "full-load"
+      "migrationType": "full-load",
+      "engineName": "oracle",
+      "targetEngineName": "mysql",
+      "databaseName": "demo-db"
     }
   }
 
