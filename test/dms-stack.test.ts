@@ -13,6 +13,7 @@ const contextProps: ContextProps = {
   account: '',
   region: '',
   vpcId: 'test-vpc',
+  vpcSecurityGroupIds: ['vpc-sg'],
   subnetIds: ['subnet-1', 'subnet-2'],
   schemas: [
     {
