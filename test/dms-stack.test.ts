@@ -7,55 +7,57 @@ import { ContextProps } from '../lib/context-props';
 let stack: DmsStack;
 let template: Template;
 
-test('init stack', () => {
-  const app = new cdk.App();
-
-  const contextProps: ContextProps = {
-    environment: 'dev',
-    account: '',
-    region: '',
-    vpcId: 'test-vpc',
-    subnetIds: ['subnet-1', 'subnet-2'],
-    vpcSecurityGroupIds: ['vpc-sg'],
-    schemas: [
-      {
-        name: 'Database1',
-        sourceSecretsManagerSecretId: 'sourceSecretId',
-        sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
-        targetSecretsManagerSecretId: 'targetSecretIdDatabase1',
-        targetSecretsManagerRoleArn: 'targetSecretRoleDatabase1',
-      },
-      {
-        name: 'Database2',
-        sourceSecretsManagerSecretId: 'sourceSecretId',
-        sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
-        targetSecretsManagerSecretId: 'targetSecretIdDatabase2',
-        targetSecretsManagerRoleArn: 'targetSecretRoleDatabase2',
-      },
-      {
-        name: 'Database3',
-        sourceSecretsManagerSecretId: 'sourceSecretId',
-        sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
-        targetSecretsManagerSecretId: 'targetSecretIdDatabase3',
-        targetSecretsManagerRoleArn: 'targetSecretRoleDatabase3',
-      },
-    ],
-    replicationInstanceClass: 'dms.t3.medium',
-    replicationInstanceIdentifier: 'replication-id',
-    replicationSubnetGroupIdentifier: 'test-replication-id',
-    replicationTaskSettings: {
-      ValidationSettings: {
-        EnableValidation: true,
-        ThreadCount: 15,
-      },
-      Logging: {
-        EnableLogging: false,
-      },
+const app = new cdk.App();
+const contextProps: ContextProps = {
+  environment: 'dev',
+  account: '',
+  region: '',
+  vpcId: 'test-vpc',
+  subnetIds: ['subnet-1', 'subnet-2'],
+  vpcSecurityGroupIds: ['vpc-sg'],
+  schemas: [
+    {
+      name: 'Database1',
+      sourceSecretsManagerSecretId: 'sourceSecretId',
+      sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
+      targetSecretsManagerSecretId: 'targetSecretIdDatabase1',
+      targetSecretsManagerRoleArn: 'targetSecretRoleDatabase1',
     },
-    migrationType: 'full-load',
-    engineVersion: '3.4.6',
-  };
+    {
+      name: 'Database2',
+      sourceSecretsManagerSecretId: 'sourceSecretId',
+      sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
+      targetSecretsManagerSecretId: 'targetSecretIdDatabase2',
+      targetSecretsManagerRoleArn: 'targetSecretRoleDatabase2',
+    },
+    {
+      name: 'Database3',
+      sourceSecretsManagerSecretId: 'sourceSecretId',
+      sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
+      targetSecretsManagerSecretId: 'targetSecretIdDatabase3',
+      targetSecretsManagerRoleArn: 'targetSecretRoleDatabase3',
+    },
+  ],
+  replicationInstanceClass: 'dms.t3.medium',
+  replicationInstanceIdentifier: 'replication-id',
+  replicationSubnetGroupIdentifier: 'test-replication-id',
+  replicationTaskSettings: {
+    ValidationSettings: {
+      EnableValidation: true,
+      ThreadCount: 15,
+    },
+    Logging: {
+      EnableLogging: false,
+    },
+  },
+  migrationType: 'full-load',
+  engineVersion: '3.4.6',
+  engineName: 'oracle',
+  targetEngineName: 'mysql',
+  databaseName: 'demo-db',
+};
 
+test('init stack', () => {
   const dmsProps = { context: contextProps };
 
   stack = new DmsStack(app, 'MyDmsStack', dmsProps);
@@ -73,15 +75,6 @@ test('AWS::DMS::ReplicationInstance', () => {
     ReplicationInstanceClass: 'dms.t3.medium',
     VpcSecurityGroupIds: ['vpc-sg'],
     EngineVersion: '3.4.6',
-  });
-});
-
-test('Source AWS::DMS::Endpoint', () => {
-  template.hasResourceProperties('AWS::DMS::Endpoint', {
-    EndpointType: 'source',
-    MySqlSettings: {
-      SecretsManagerSecretId: 'sourceSecretId',
-    },
   });
 });
 
@@ -108,6 +101,17 @@ test('Target AWS::DMS::Endpoint', () => {
   });
 
   template.resourceCountIs('AWS::DMS::Endpoint', 6);
+});
+
+test('Source Oracle AWS::DMS::Endpoint', () => {
+  template.hasResourceProperties('AWS::DMS::Endpoint', {
+    EndpointType: 'source',
+    EngineName: 'oracle',
+    DatabaseName: 'demo-db',
+    OracleSettings: {
+      SecretsManagerSecretId: 'sourceSecretId',
+    },
+  });
 });
 
 test('AWS::DMS::ReplicationTask TableMappings', () => {

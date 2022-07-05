@@ -20,8 +20,10 @@ class DmsStack extends cdk.Stack {
       replicationInstanceIdentifier: context.replicationInstanceIdentifier,
       vpcSecurityGroupIds: context.vpcSecurityGroupIds!,
       engineName: context.engineName,
+      targetEngineName: context.targetEngineName,
       region: cdk.Stack.of(this).region,
       engineVersion: context.engineVersion ? context.engineVersion : '3.4.6',
+      databaseName: context.databaseName,
     };
 
     const dmsReplication = new DmsReplication(this, 'Replication', dmsProps);
@@ -30,17 +32,66 @@ class DmsStack extends cdk.Stack {
     // Creates DMS Task for each schema
     context.schemas.forEach(
       (schema: { name: string; sourceSecretsManagerSecretId: string; targetSecretsManagerSecretId: string }) => {
-        const source = dmsReplication.createMySQLEndpoint(
-          `source-${schema.name}-${suffix}`,
-          'source',
-          schema.sourceSecretsManagerSecretId
-        );
+        let source;
+        let target;
 
-        const target = dmsReplication.createMySQLEndpoint(
-          `target-${schema.name}-${suffix}`,
-          'target',
-          schema.targetSecretsManagerSecretId
-        );
+        switch (context.engineName) {
+          case 'mysql':
+            source = dmsReplication.createMySQLEndpoint(
+              `source-${schema.name}-${suffix}`,
+              'source',
+              schema.sourceSecretsManagerSecretId
+            );
+            break;
+          case 'oracle':
+            source = dmsReplication.createOracleEndpoint(
+              `source-${schema.name}-${suffix}`,
+              'source',
+              schema.sourceSecretsManagerSecretId,
+              context.databaseName!
+            );
+            break;
+          default:
+            source = dmsReplication.createMySQLEndpoint(
+              `source-${schema.name}-${suffix}`,
+              'source',
+              schema.sourceSecretsManagerSecretId
+            );
+            break;
+        }
+
+        switch (context.targetEngineName) {
+          case 'mysql':
+            target = dmsReplication.createMySQLEndpoint(
+              `target-${schema.name}-${suffix}`,
+              'target',
+              schema.targetSecretsManagerSecretId
+            );
+            break;
+          case 'oracle':
+            target = dmsReplication.createOracleEndpoint(
+              `target-${schema.name}-${suffix}`,
+              'target',
+              schema.targetSecretsManagerSecretId,
+              context.databaseName!
+            );
+            break;
+          case 'aurora-postgresql':
+            target = dmsReplication.createAuroraPostgresEndpoint(
+              `target-${schema.name}-${suffix}`,
+              'target',
+              schema.targetSecretsManagerSecretId,
+              context.databaseName!
+            );
+            break;
+          default:
+            target = dmsReplication.createMySQLEndpoint(
+              `target-${schema.name}-${suffix}`,
+              'target',
+              schema.targetSecretsManagerSecretId
+            );
+            break;
+        }
 
         dmsReplication.createReplicationTask(
           `${schema.name}-replication-${suffix}`,

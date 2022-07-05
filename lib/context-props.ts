@@ -218,6 +218,12 @@ export interface ContextProps {
   /** DMS Engine Version */
   engineVersion?: '3.4.6' | '3.4.7';
 
-  /** Database Engine name */
+  /** Source database Engine names */
   engineName?: 'mysql' | 'oracle';
+
+  /** Target database Engine names */
+  targetEngineName?: 'mysql' | 'oracle' | 'aurora-postgresql';
+
+  /** Database name for oracle and postgres */
+  databaseName?: string;
 }
