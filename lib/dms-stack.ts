@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { ContextProps } from './context-props';
-import DMSReplication from './dms-replication';
+import DmsReplication from './dms-replication';
 import getTaskSettings from './task-settings';
 
 type DmsProps = cdk.StackProps & {
@@ -18,13 +18,13 @@ class DmsStack extends cdk.Stack {
       replicationSubnetGroupIdentifier: context.replicationSubnetGroupIdentifier,
       replicationInstanceClass: context.replicationInstanceClass,
       replicationInstanceIdentifier: context.replicationInstanceIdentifier,
-      vpcSecurityGroupIds: context.vpcSecurityGroupIds,
-      engineName: 'mysql',
+      vpcSecurityGroupIds: context.vpcSecurityGroupIds!,
+      engineName: context.engineName,
       region: cdk.Stack.of(this).region,
       engineVersion: context.engineVersion ? context.engineVersion : '3.4.6',
     };
 
-    const dmsReplication = new DMSReplication(this, 'Replication', dmsProps);
+    const dmsReplication = new DmsReplication(this, 'Replication', dmsProps);
     const suffix = context.replicationInstanceIdentifier;
 
     // Creates DMS Task for each schema

@@ -181,9 +181,9 @@ export interface ContextProps {
   subnetIds: string[];
 
   /**
-   *  Security group Ids from target RDS for DMS task runningin replication instance access
+   *  Security group Ids of target RDS for DMS task access
    */
-  vpcSecurityGroupIds: string[];
+  vpcSecurityGroupIds?: string[];
 
   /**
    * List of databases to be migrated
@@ -217,4 +217,7 @@ export interface ContextProps {
 
   /** DMS Engine Version */
   engineVersion?: '3.4.6' | '3.4.7';
+
+  /** Database Engine name */
+  engineName?: 'mysql' | 'oracle';
 }
