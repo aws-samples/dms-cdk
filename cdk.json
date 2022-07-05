@@ -11,9 +11,6 @@
         "subnet-xxxx-a",
         "subnet-xxxx-b"
       ],
-      "vpcSecurityGroupIds": [
-        "sg-0fb0cf191060b3b83"
-      ],
       "schemas": [
         {
           "name": "demo-src-db",

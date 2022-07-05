@@ -14,7 +14,6 @@ const contextProps: ContextProps = {
   region: '',
   vpcId: 'test-vpc',
   subnetIds: ['subnet-1', 'subnet-2'],
-  vpcSecurityGroupIds: ['vpc-sg'],
   schemas: [
     {
       name: 'Database1',
