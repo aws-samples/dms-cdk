@@ -172,7 +172,7 @@ class DmsReplication extends Construct {
   ): CfnEndpoint {
     const target_extra_conn_attr =
       'useLogMinerReader=N;useBfile=Y;failTasksOnLobTruncation=true;numberDataTypeScale=-2';
-    const endpoint = new CfnEndpoint(this, `oracle-${endpointType}-${databaseName}-${endpointIdentifier}`, {
+    const endpoint = new CfnEndpoint(this, `oracle-${endpointType}-${endpointIdentifier}`, {
       endpointIdentifier,
       endpointType,
       engineName: 'oracle',
@@ -203,7 +203,7 @@ class DmsReplication extends Construct {
     databaseName: string
   ): CfnEndpoint {
     const target_extra_conn_attr = 'executeTimeout=180';
-    const endpoint = new CfnEndpoint(this, `aurora-postgresql-${endpointType}-${databaseName}-${endpointIdentifier}`, {
+    const endpoint = new CfnEndpoint(this, `aurora-postgresql-${endpointType}-${endpointIdentifier}`, {
       endpointIdentifier,
       endpointType,
       engineName: 'aurora-postgresql',
@@ -234,7 +234,7 @@ class DmsReplication extends Construct {
     databaseName: string
   ): CfnEndpoint {
     const target_extra_conn_attr = 'executeTimeout=180';
-    const endpoint = new CfnEndpoint(this, `postgresql-${endpointType}-${databaseName}-${endpointIdentifier}`, {
+    const endpoint = new CfnEndpoint(this, `postgresql-${endpointType}-${endpointIdentifier}`, {
       endpointIdentifier,
       endpointType,
       engineName: 'postgres',
@@ -264,7 +264,7 @@ class DmsReplication extends Construct {
     secretId: string,
     databaseName: string
   ): CfnEndpoint {
-    const endpoint = new CfnEndpoint(this, `sqlserver-${endpointType}-${databaseName}-${endpointIdentifier}`, {
+    const endpoint = new CfnEndpoint(this, `sqlserver-${endpointType}-${endpointIdentifier}`, {
       endpointIdentifier,
       endpointType,
       engineName: 'sqlserver',
