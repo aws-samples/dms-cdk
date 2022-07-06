@@ -105,7 +105,7 @@ class DmsStack extends cdk.Stack {
             target = dmsReplication.createSqlServerEndpoint(
               `source-${context.databaseName}-${suffix}`,
               'target',
-              schema.sourceSecretsManagerSecretId,
+              schema.targetSecretsManagerSecretId,
               context.databaseName!
             );
             break;
@@ -113,7 +113,7 @@ class DmsStack extends cdk.Stack {
             target = dmsReplication.createPostgresEndpoint(
               `source-${context.databaseName}-${suffix}`,
               'target',
-              schema.sourceSecretsManagerSecretId,
+              schema.targetSecretsManagerSecretId,
               context.databaseName!
             );
             break;
