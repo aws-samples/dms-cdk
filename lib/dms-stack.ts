@@ -36,17 +36,23 @@ class DmsStack extends cdk.Stack {
         let source;
         let target;
 
+        let schemaName = schema.name;
+
+        if (schema.name.includes('_')) {
+          schemaName = schema.name.replace('_', '-');
+        }
+
         switch (context.engineName) {
           case 'mysql':
             source = dmsReplication.createMySQLEndpoint(
-              `source-${schema.name}-${suffix}`,
+              `source-${schemaName}-${suffix}`,
               'source',
               schema.sourceSecretsManagerSecretId
             );
             break;
           case 'oracle':
             source = dmsReplication.createOracleEndpoint(
-              `source-${schema.name}-${suffix}`,
+              `source-${schemaName}-${suffix}`,
               'source',
               schema.sourceSecretsManagerSecretId,
               context.databaseName!
@@ -54,7 +60,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'sqlserver':
             source = dmsReplication.createSqlServerEndpoint(
-              `source-${schema.name}-${suffix}`,
+              `source-${schemaName}-${suffix}`,
               'source',
               schema.sourceSecretsManagerSecretId,
               context.databaseName!
@@ -62,7 +68,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'postgres':
             source = dmsReplication.createPostgresEndpoint(
-              `source-${schema.name}-${suffix}`,
+              `source-${schemaName}-${suffix}`,
               'source',
               schema.sourceSecretsManagerSecretId,
               context.databaseName!
@@ -70,7 +76,7 @@ class DmsStack extends cdk.Stack {
             break;
           default:
             source = dmsReplication.createMySQLEndpoint(
-              `source-${schema.name}-${suffix}`,
+              `source-${schemaName}-${suffix}`,
               'source',
               schema.sourceSecretsManagerSecretId
             );
@@ -80,14 +86,14 @@ class DmsStack extends cdk.Stack {
         switch (context.targetEngineName) {
           case 'mysql':
             target = dmsReplication.createMySQLEndpoint(
-              `target-${schema.name}-${suffix}`,
+              `target-${schemaName}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId
             );
             break;
           case 'oracle':
             target = dmsReplication.createOracleEndpoint(
-              `target-${schema.name}-${suffix}`,
+              `target-${schemaName}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId,
               context.databaseName!
@@ -95,7 +101,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'aurora-postgresql':
             target = dmsReplication.createAuroraPostgresEndpoint(
-              `target-${schema.name}-${suffix}`,
+              `target-${schemaName}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId,
               context.databaseName!
@@ -103,7 +109,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'sqlserver':
             target = dmsReplication.createSqlServerEndpoint(
-              `target-${schema.name}-${suffix}`,
+              `target-${schemaName}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId,
               context.databaseName!
@@ -111,7 +117,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'postgres':
             target = dmsReplication.createPostgresEndpoint(
-              `target-${schema.name}-${suffix}`,
+              `target-${schemaName}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId,
               context.databaseName!
@@ -119,7 +125,7 @@ class DmsStack extends cdk.Stack {
             break;
           default:
             target = dmsReplication.createMySQLEndpoint(
-              `target-${schema.name}-${suffix}`,
+              `target-${schemaName}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId
             );
@@ -127,7 +133,7 @@ class DmsStack extends cdk.Stack {
         }
 
         dmsReplication.createReplicationTask(
-          `${schema.name}-replication-${suffix}`,
+          `${schemaName}-replication-${suffix}`,
           schema.name,
           source,
           target,

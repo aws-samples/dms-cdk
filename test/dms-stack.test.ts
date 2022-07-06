@@ -17,21 +17,21 @@ const contextProps: ContextProps = {
   subnetIds: ['subnet-1', 'subnet-2'],
   schemas: [
     {
-      name: 'Database1',
+      name: 'Database_1',
       sourceSecretsManagerSecretId: 'sourceSecretId',
       sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
       targetSecretsManagerSecretId: 'targetSecretIdDatabase1',
       targetSecretsManagerRoleArn: 'targetSecretRoleDatabase1',
     },
     {
-      name: 'Database2',
+      name: 'Database_2',
       sourceSecretsManagerSecretId: 'sourceSecretId',
       sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
       targetSecretsManagerSecretId: 'targetSecretIdDatabase2',
       targetSecretsManagerRoleArn: 'targetSecretRoleDatabase2',
     },
     {
-      name: 'Database3',
+      name: 'Database_3',
       sourceSecretsManagerSecretId: 'sourceSecretId',
       sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
       targetSecretsManagerSecretId: 'targetSecretIdDatabase3',
@@ -119,7 +119,7 @@ test('AWS::DMS::ReplicationTask TableMappings', () => {
   template.hasResourceProperties('AWS::DMS::ReplicationTask', {
     MigrationType: 'full-load',
     TableMappings:
-      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"Database1","table-name":"%"},"rule-action":"include"}]}',
+      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"Database_1","table-name":"%"},"rule-action":"include"}]}',
   });
 
   template.resourceCountIs('AWS::DMS::ReplicationTask', 3);
