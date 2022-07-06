@@ -219,10 +219,10 @@ export interface ContextProps {
   engineVersion?: '3.4.6' | '3.4.7';
 
   /** Source database Engine names */
-  engineName?: 'mysql' | 'oracle';
+  engineName: 'mysql' | 'oracle' | 'aurora-postgresql' | 'sqlserver' | 'postgres';
 
   /** Target database Engine names */
-  targetEngineName?: 'mysql' | 'oracle' | 'aurora-postgresql';
+  targetEngineName: 'mysql' | 'oracle' | 'aurora-postgresql' | 'sqlserver' | 'postgres';
 
   /** Database name for oracle and postgres */
   databaseName?: string;

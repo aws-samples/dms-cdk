@@ -38,7 +38,7 @@ const contextProps: ContextProps = {
       targetSecretsManagerRoleArn: 'targetSecretRoleDatabase3',
     },
   ],
-  replicationInstanceClass: 'dms.t3.medium',
+  replicationInstanceClass: 'dms.r5.4xlarge',
   replicationInstanceIdentifier: 'replication-id',
   replicationSubnetGroupIdentifier: 'test-replication-id',
   replicationTaskSettings: {
@@ -72,7 +72,7 @@ test('AWS::DMS::ReplicationSubnetGroup', () => {
 
 test('AWS::DMS::ReplicationInstance', () => {
   template.hasResourceProperties('AWS::DMS::ReplicationInstance', {
-    ReplicationInstanceClass: 'dms.t3.medium',
+    ReplicationInstanceClass: 'dms.r5.4xlarge',
     VpcSecurityGroupIds: ['vpc-sg'],
     EngineVersion: '3.4.6',
   });

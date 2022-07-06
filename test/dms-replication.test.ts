@@ -1,7 +1,7 @@
 /* eslint-disable jest/expect-expect */
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import DmsReplication, { DmsProps } from '../lib/dms-replication';
+import { DmsReplication, DmsProps } from '../lib/dms-replication';
 
 class DmsTestStack extends cdk.Stack {
   public dmsReplication: DmsReplication;

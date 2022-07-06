@@ -171,9 +171,9 @@ The solution is primarily designed for RDS MySQL database. However, it can easil
     ```
 
     import * as cdk from 'aws-cdk-lib';
-    import DMSReplication from '../lib/dms-replication';
+    import { DmsReplication } from '../lib/dms-replication';
 
-    class DemoDMSStack extends cdk.Stack {
+    class DemoDmsStack extends cdk.Stack {
       constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
@@ -187,7 +187,7 @@ The solution is primarily designed for RDS MySQL database. However, it can easil
           region: cdk.Stack.of(this).region,
         };
 
-        const dmsReplication = new DMSReplication(this, 'DMSReplicationService', dmsProps);
+        const dmsReplication = new DmsReplication(this, 'DMSReplicationService', dmsProps);
         const source = dmsReplication.createMySQLEndpoint('db-on-source', 'source', 'sourceSecretsManagerSecretId');
         const target = dmsReplication.createMySQLEndpoint('rds-target', 'target', 'targetSecretsManagerSecretId');
 
@@ -203,18 +203,20 @@ In the cdk.json file you define the DMS related settings.
 
 | Params                              | Description                                                                    | Default       | Required |
 | ----------------------------------- | :----------------------------------------------------------------------------- | :------------ | -------- |
-| environment                         | Name of your environment to deploy the CDK application                         |   dev         |  y       |
+| environment                         | Name of your environment identifier to deploy the CDK application              | dev           |  y       |
 | subnetIds                           | Subnet ids of your VPC used in creation subnet group for DMS service.          |               |  y       |
 | replicationInstanceClass            | The type of DMS instance class                                                 | dms.t3.medium |  n       |
 | replicationSubnetGroupIdentifier    | The identifier of the subnet group where replication instance would be located |               |  n       |
 | replicationInstanceIdentifier       | The unique identifier of the replication instance                              |               |  y       |
-| migrationType                       | The type of migration. full-load or cdc or full-load-with-cdc                  | full-load     |  n       |
+| replicationTaskSettings             | DMS task settings that overrides default values in task-settings.ts            |               |  n       |
+| migrationType                       | Is full load or change data capture (full-load or cdc)                         | full-load     |  y       |
 | sourceSecretsManagerSecretId        | ARN of secrets manager for source database credentials                         |               |  y       |
 | targetSecretsManagerSecretId        | ARN of secrets manager for target database                                     |               |  y       |
 | allocatedStorage                    | Storage space for the replication instance (should be based on log size)       |  50g          |  n       |
-| engineName                          | Version of DMS engine                                                          | 3.4.6         |  n       |
-| engineVersion                       | The name of database engine. Only mysql and maridb is allowed                  | mysql         |  n       |
-| publiclyAccessible                  | If the DMS instance is publicly accessible.                                    | false         |  y       |
+| engineName                          | Supported databases -oracle, postgres, sqlserver andaurora-postgresql          | mysql         |  y       |
+| engineVersion                       | DMS engine version                                                             | 3.4.6         |  n       |
+| targetEngineVersion                 | The name of target database engine (mysql, oracle and aurora-postgresql)       | mysql         |  n       |
+| databaseName                        | Name of the database to be migrated. Relavant for oracle, postgres...          | false         |  y       |
 
 
 ## Security

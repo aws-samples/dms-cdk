@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 import * as cdk from 'aws-cdk-lib';
-import DMSReplication from '../lib/dms-replication';
+import { DmsReplication } from '../lib/dms-replication';
 
-class DemoDMSStack extends cdk.Stack {
+class DemoDmsStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -16,7 +16,7 @@ class DemoDMSStack extends cdk.Stack {
       region: cdk.Stack.of(this).region,
     };
 
-    const dmsReplication = new DMSReplication(this, 'DMSReplicationService', dmsProps);
+    const dmsReplication = new DmsReplication(this, 'DMSReplicationService', dmsProps);
     const source = dmsReplication.createMySQLEndpoint('db-on-source', 'source', 'sourceSecretsManagerSecretId');
     const target = dmsReplication.createMySQLEndpoint('rds-target', 'target', 'targetSecretsManagerSecretId');
 

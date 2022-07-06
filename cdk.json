@@ -25,7 +25,7 @@
       },
       "migrationType": "full-load",
       "engineName": "oracle",
-      "targetEngineName": "mysql",
+      "targetEngineName": "aurora-postgresql",
       "databaseName": "demo-db"
     }
   }

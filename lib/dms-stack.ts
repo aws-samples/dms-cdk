@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { ContextProps } from './context-props';
-import DmsReplication from './dms-replication';
+import { DmsReplication } from './dms-replication';
 import getTaskSettings from './task-settings';
 
 type DmsProps = cdk.StackProps & {
@@ -51,6 +51,22 @@ class DmsStack extends cdk.Stack {
               context.databaseName!
             );
             break;
+          case 'sqlserver':
+            source = dmsReplication.createSqlServerEndpoint(
+              `source-${schema.name}-${suffix}`,
+              'source',
+              schema.sourceSecretsManagerSecretId,
+              context.databaseName!
+            );
+            break;
+          case 'postgres':
+            source = dmsReplication.createPostgresEndpoint(
+              `source-${schema.name}-${suffix}`,
+              'source',
+              schema.sourceSecretsManagerSecretId,
+              context.databaseName!
+            );
+            break;
           default:
             source = dmsReplication.createMySQLEndpoint(
               `source-${schema.name}-${suffix}`,
@@ -81,6 +97,22 @@ class DmsStack extends cdk.Stack {
               `target-${schema.name}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId,
+              context.databaseName!
+            );
+            break;
+          case 'sqlserver':
+            target = dmsReplication.createSqlServerEndpoint(
+              `source-${schema.name}-${suffix}`,
+              'target',
+              schema.sourceSecretsManagerSecretId,
+              context.databaseName!
+            );
+            break;
+          case 'postgres':
+            target = dmsReplication.createPostgresEndpoint(
+              `source-${schema.name}-${suffix}`,
+              'target',
+              schema.sourceSecretsManagerSecretId,
               context.databaseName!
             );
             break;

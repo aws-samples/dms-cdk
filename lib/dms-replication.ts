@@ -155,6 +155,15 @@ class DmsReplication extends Construct {
     return endpoint;
   }
 
+  /**
+   * Creates endpoint for oracle database
+   *
+   * @param endpointIdentifier
+   * @param endpointType
+   * @param secretId
+   * @param databaseName
+   * @returns
+   */
   public createOracleEndpoint(
     endpointIdentifier: string,
     endpointType: 'source' | 'target',
@@ -178,6 +187,15 @@ class DmsReplication extends Construct {
     return endpoint;
   }
 
+  /**
+   * Creates endpoint for Aurora PostgresSql
+   *
+   * @param endpointIdentifier
+   * @param endpointType
+   * @param secretId
+   * @param databaseName
+   * @returns
+   */
   public createAuroraPostgresEndpoint(
     endpointIdentifier: string,
     endpointType: 'source' | 'target',
@@ -195,6 +213,66 @@ class DmsReplication extends Construct {
         secretsManagerSecretId: secretId,
       },
       extraConnectionAttributes: endpointType === 'source' ? 'heartbeatFrequency=5' : target_extra_conn_attr,
+    });
+
+    return endpoint;
+  }
+
+  /**
+   * Creates endpoint for PostgresSql
+   *
+   * @param endpointIdentifier
+   * @param endpointType
+   * @param secretId
+   * @param databaseName
+   * @returns
+   */
+  public createPostgresEndpoint(
+    endpointIdentifier: string,
+    endpointType: 'source' | 'target',
+    secretId: string,
+    databaseName: string
+  ): CfnEndpoint {
+    const target_extra_conn_attr = 'executeTimeout=180';
+    const endpoint = new CfnEndpoint(this, `postgresql-${endpointType}-${databaseName}-${endpointIdentifier}`, {
+      endpointIdentifier,
+      endpointType,
+      engineName: 'postgres',
+      databaseName,
+      postgreSqlSettings: {
+        secretsManagerAccessRoleArn: this.secretsManagerAccessRole.roleArn,
+        secretsManagerSecretId: secretId,
+      },
+      extraConnectionAttributes: endpointType === 'source' ? 'heartbeatFrequency=5' : target_extra_conn_attr,
+    });
+
+    return endpoint;
+  }
+
+  /**
+   * Creates endpoint for Microsoft SqlServer
+   *
+   * @param endpointIdentifier
+   * @param endpointType
+   * @param secretId
+   * @param databaseName
+   * @returns
+   */
+  public createSqlServerEndpoint(
+    endpointIdentifier: string,
+    endpointType: 'source' | 'target',
+    secretId: string,
+    databaseName: string
+  ): CfnEndpoint {
+    const endpoint = new CfnEndpoint(this, `sqlserver-${endpointType}-${databaseName}-${endpointIdentifier}`, {
+      endpointIdentifier,
+      endpointType,
+      engineName: 'sqlserver',
+      databaseName,
+      microsoftSqlServerSettings: {
+        secretsManagerAccessRoleArn: this.secretsManagerAccessRole.roleArn,
+        secretsManagerSecretId: secretId,
+      },
     });
 
     return endpoint;
@@ -241,4 +319,4 @@ class DmsReplication extends Construct {
   }
 }
 
-export default DmsReplication;
+export { DmsReplication };
