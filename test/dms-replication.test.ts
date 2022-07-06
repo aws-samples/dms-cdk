@@ -1,56 +1,41 @@
 /* eslint-disable jest/expect-expect */
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { DmsReplication, DmsProps } from '../lib/dms-replication';
-
-class DmsTestStack extends cdk.Stack {
-  public dmsReplication: DmsReplication;
-
-  constructor(scope: cdk.App, id: string, props: DmsProps) {
-    super(scope, id, { env: { region: 'us-east-1' } });
-
-    this.dmsReplication = new DmsReplication(this, 'DMSReplicationService', props);
-    let source;
-
-    switch (props.engineName) {
-      case 'mysql':
-        source = this.dmsReplication.createMySQLEndpoint('db-on-source', 'source', 'sourceSecretsManagerSecretId');
-        break;
-      case 'oracle':
-        source = this.dmsReplication.createOracleEndpoint(
-          'db-on-source',
-          'source',
-          'sourceSecretsManagerSecretId',
-          'orcl'
-        );
-        break;
-      default:
-        source = this.dmsReplication.createMySQLEndpoint('db-on-source', 'source', 'sourceSecretsManagerSecretId');
-        break;
-    }
-
-    const target = this.dmsReplication.createMySQLEndpoint('rds-target', 'target', 'targetSecretsManagerSecretId');
-
-    this.dmsReplication.createReplicationTask('test-replication-task', 'platform', source, target);
-  }
-}
+import DmsStack from '../lib/dms-stack';
 
 let template: Template;
-let stack: DmsTestStack;
+let stack: DmsStack;
 
 test('init stack', () => {
   const app = new cdk.App();
-  const dmsProps = {
+
+  stack = new DmsStack(app, 'DmsTestStack', {
+    vpcId: 'vpc-id',
     subnetIds: ['subnet-1', 'subnet-2'],
     replicationInstanceClass: 'dms-mysql-uk',
     replicationInstanceIdentifier: 'test-repl-01',
     replicationSubnetGroupIdentifier: 'subnet-group',
     vpcSecurityGroupIds: ['vpc-security'],
-    engineName: 'mysql',
-    region: 'us-east-1',
     engineVersion: '3.4.7',
-  };
-  stack = new DmsTestStack(app, 'DmsTestStack', dmsProps);
+    schemas: [
+      {
+        name: 'demo_test',
+        sourceSecretsManagerSecretId: 'sourceSecretsManagerSecretId',
+        targetSecretsManagerSecretId: 'targetSecretMgrId',
+        migrationType: 'full-load',
+        engineName: 'mysql',
+        targetEngineName: 'oracle',
+      },
+    ],
+    publiclyAccessible: false,
+    allocatedStorage: 50,
+    env: {
+      account: '11111111111',
+      region: 'eu-central-1',
+    },
+  });
+
+
   template = Template.fromStack(stack);
 });
 
@@ -78,8 +63,6 @@ test('should allocated storage AWS::DMS::ReplicationInstance', () => {
 });
 
 test('target endpoint created with correct attributes', () => {
-  // Create source endpoint
-  stack.dmsReplication.createMySQLEndpoint('src-endpoint-1', 'source', 'sourceSecretId');
 
   template.hasResourceProperties('AWS::DMS::Endpoint', {
     EndpointType: 'source',
@@ -90,43 +73,40 @@ test('target endpoint created with correct attributes', () => {
     },
   });
 
-  // Create target endpoint
-  stack.dmsReplication.createMySQLEndpoint('tgt-endpoint-3', 'target', 'targetSecret');
-
   template.hasResourceProperties('AWS::DMS::Endpoint', {
     EndpointType: 'target',
-    ExtraConnectionAttributes: 'parallelLoadThreads=1 maxFileSize=512',
+    EngineName: 'oracle',
   });
 });
 
 test('create replication task', () => {
   template.hasResourceProperties('AWS::DMS::ReplicationTask', {
     MigrationType: 'full-load',
-    ReplicationTaskIdentifier: 'test-replication-task',
+    ReplicationTaskIdentifier: 'demo_test-replication-test-repl-01',
     TableMappings:
-      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"platform","table-name":"%"},"rule-action":"include"}]}',
+      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"demo_test","table-name":"%"},"rule-action":"include"}]}',
   });
 });
 
 // Create oracle endpoint
-test('oracle endpoint created with correct attributes', () => {
-  const app = new cdk.App();
-  const dmsOracleProps = {
-    subnetIds: ['subnet-1', 'subnet-2'],
-    replicationInstanceClass: 'dms-oracle',
-    replicationInstanceIdentifier: 'test-repl-02',
-    replicationSubnetGroupIdentifier: 'subnet-group-oracle',
-    vpcSecurityGroupIds: ['vpc-security'],
-    engineName: 'oracle',
-    region: 'eu-west-1',
-    engineVersion: '3.4.7',
-  };
+// test('oracle endpoint created with correct attributes', () => {
+//   const app = new cdk.App();
+//   const dmsOracleProps = {
+//     subnetIds: ['subnet-1', 'subnet-2'],
+//     replicationInstanceClass: 'dms-oracle',
+//     replicationInstanceIdentifier: 'test-repl-02',
+//     replicationSubnetGroupIdentifier: 'subnet-group-oracle',
+//     vpcSecurityGroupIds: ['vpc-security'],
+//     engineName: 'oracle',
+//     region: 'eu-west-1',
+//     engineVersion: '3.4.7',
+//   };
 
-  const oracleStack = new DmsTestStack(app, 'DmsOracleTestStack', dmsOracleProps);
-  const oracleTemplate = Template.fromStack(oracleStack);
+//   const oracleStack = new DmsStack(app, 'DmsOracleTestStack', dmsOracleProps);
+//   const oracleTemplate = Template.fromStack(oracleStack);
 
-  oracleTemplate.hasResourceProperties('AWS::DMS::Endpoint', {
-    EndpointType: 'source',
-    EngineName: 'oracle',
-  });
-});
+//   oracleTemplate.hasResourceProperties('AWS::DMS::Endpoint', {
+//     EndpointType: 'source',
+//     EngineName: 'oracle',
+//   });
+// });

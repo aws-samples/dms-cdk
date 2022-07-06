@@ -11,10 +11,14 @@ const env = app.node.tryGetContext('environment');
 // get context from conf
 const context = JSON.parse(fs.readFileSync('./conf/env.json', 'utf-8'));
 
-new DmsStack(app, 'DmsStack', {
-  context,
-  env: {
-    account: context[env].account,
-    region: context[env].region,
-  },
-});
+const dmsProps = {
+  vpcId: context[env].vpcId,
+  subnetIds: context[env].subnetIds,
+  replicationSubnetGroupIdentifier: context[env].replicationSubnetGroupIdentifier,
+  replicationInstanceClass: context[env].replicationInstanceClass,
+  replicationInstanceIdentifier: context[env].replicationInstanceIdentifier,
+  schemas: context[env].schemas,
+  publiclyAccessible: context[env].publiclyAccessible,
+};
+
+new DmsStack(app, 'DmsStack', dmsProps);
