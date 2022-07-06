@@ -24,6 +24,7 @@ class DmsStack extends cdk.Stack {
       region: cdk.Stack.of(this).region,
       engineVersion: context.engineVersion ? context.engineVersion : '3.4.6',
       databaseName: context.databaseName,
+      publiclyAccessible: context.publiclyAccessible,
     };
 
     const dmsReplication = new DmsReplication(this, 'Replication', dmsProps);

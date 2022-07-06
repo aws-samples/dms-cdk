@@ -226,4 +226,7 @@ export interface ContextProps {
 
   /** Database name for oracle and postgres */
   databaseName?: string;
+
+  /** DMS is publicly accessible */
+  publiclyAccessible: boolean;
 }

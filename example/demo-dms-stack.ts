@@ -14,6 +14,7 @@ class DemoDmsStack extends cdk.Stack {
       vpcSecurityGroupIds: ['sg-xxxx'],
       engineName: 'mysql',
       region: cdk.Stack.of(this).region,
+      publiclyAccessible: false
     };
 
     const dmsReplication = new DmsReplication(this, 'DMSReplicationService', dmsProps);

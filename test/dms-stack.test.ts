@@ -55,6 +55,7 @@ const contextProps: ContextProps = {
   engineName: 'oracle',
   targetEngineName: 'mysql',
   databaseName: 'demo-db',
+  publiclyAccessible: true,
 };
 
 test('init stack', () => {
@@ -122,4 +123,11 @@ test('AWS::DMS::ReplicationTask TableMappings', () => {
   });
 
   template.resourceCountIs('AWS::DMS::ReplicationTask', 3);
+});
+
+test('Publicly accessible is true', () => {
+  template.hasResourceProperties('AWS::DMS::ReplicationInstance', {
+    ReplicationInstanceClass: 'dms.r5.4xlarge',
+    PubliclyAccessible: true,
+  });
 });
