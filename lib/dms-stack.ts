@@ -46,7 +46,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'oracle':
             source = dmsReplication.createOracleEndpoint(
-              `source-${context.databaseName}-${suffix}`,
+              `source-${schema.name}-${suffix}`,
               'source',
               schema.sourceSecretsManagerSecretId,
               context.databaseName!
@@ -54,7 +54,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'sqlserver':
             source = dmsReplication.createSqlServerEndpoint(
-              `source-${context.databaseName}-${suffix}`,
+              `source-${schema.name}-${suffix}`,
               'source',
               schema.sourceSecretsManagerSecretId,
               context.databaseName!
@@ -62,7 +62,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'postgres':
             source = dmsReplication.createPostgresEndpoint(
-              `source-${context.databaseName}-${suffix}`,
+              `source-${schema.name}-${suffix}`,
               'source',
               schema.sourceSecretsManagerSecretId,
               context.databaseName!
@@ -87,7 +87,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'oracle':
             target = dmsReplication.createOracleEndpoint(
-              `target-${context.databaseName}-${suffix}`,
+              `target-${schema.name}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId,
               context.databaseName!
@@ -95,7 +95,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'aurora-postgresql':
             target = dmsReplication.createAuroraPostgresEndpoint(
-              `target-${context.databaseName}-${suffix}`,
+              `target-${schema.name}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId,
               context.databaseName!
@@ -103,7 +103,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'sqlserver':
             target = dmsReplication.createSqlServerEndpoint(
-              `source-${context.databaseName}-${suffix}`,
+              `target-${schema.name}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId,
               context.databaseName!
@@ -111,7 +111,7 @@ class DmsStack extends cdk.Stack {
             break;
           case 'postgres':
             target = dmsReplication.createPostgresEndpoint(
-              `source-${context.databaseName}-${suffix}`,
+              `target-${schema.name}-${suffix}`,
               'target',
               schema.targetSecretsManagerSecretId,
               context.databaseName!
