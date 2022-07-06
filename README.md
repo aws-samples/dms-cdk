@@ -138,12 +138,12 @@ Ensure that all pre-requisites are in place. The source code is repository is lo
 
     npm install
 
-    npm test
+    npm run build && test
    ```
 
 1. Deploy the solution to your account based on cdk.json configuration. Use the 'dms' profile created previously in the cdk deploy command
    ```
-    cdk deploy --profile dms
+    npx cdk deploy --profile dms
    ```
 
 1. Post validation : If the deployment is sucessful you will see the cloudformation stack under **AWS Services > Cloudformation** in AWS console. Following resources are created by this deployment.
@@ -213,10 +213,12 @@ In the cdk.json file you define the DMS related settings.
 | sourceSecretsManagerSecretId        | ARN of secrets manager for source database credentials                         |               |  y       |
 | targetSecretsManagerSecretId        | ARN of secrets manager for target database                                     |               |  y       |
 | allocatedStorage                    | Storage space for the replication instance (should be based on log size)       |  50g          |  n       |
-| engineName                          | Supported databases -oracle, postgres, sqlserver andaurora-postgresql          | mysql         |  y       |
+| engineName                          | Supported source databases oracle, postgres, sqlserver, mysql                  | mysql         |  y       |
+| targetEngineName                    | Supported target databases oracle, postgres, sqlserver, aurora-postgresql      | mysql         |  y       |
 | engineVersion                       | DMS engine version                                                             | 3.4.6         |  n       |
 | targetEngineVersion                 | The name of target database engine (mysql, oracle and aurora-postgresql)       | mysql         |  n       |
-| databaseName                        | Name of the database to be migrated. Relavant for oracle, postgres...          | false         |  y       |
+| databaseName                        | Name of the database to be migrated. Relavant for oracle, postgres...          | false         |  n       |
+| publiclyAccessible                  | DMS endpoint is publicly accessible or not                                     | false         |  n       |
 
 
 ## Security
