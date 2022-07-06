@@ -13,7 +13,7 @@
       ],
       "schemas": [
         {
-          "name": "demo-src-db",
+          "name": "my_demo_db",
           "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:111111111111:secret:dev/source-xxxx",
           "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:111111111111:secret:dev/target-xxxxx"
         }
