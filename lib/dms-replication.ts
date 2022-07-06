@@ -8,7 +8,7 @@ import {
   CfnEndpoint,
 } from 'aws-cdk-lib/aws-dms';
 import { Construct } from 'constructs';
-import { TaskSettings } from './context-props';
+import { TaskSettings } from '../conf/task_settings.json';
 
 export type DmsProps = {
   subnetIds: string[];
@@ -289,8 +289,7 @@ class DmsReplication extends Construct {
     schema: string,
     source: CfnEndpoint,
     target: CfnEndpoint,
-    migrationType?: 'cdc' | 'full-load' | 'full-load-and-cdc',
-    replicationTaskSettings?: TaskSettings
+    migrationType?: 'cdc' | 'full-load' | 'full-load-and-cdc'
   ): CfnReplicationTask {
     const replicationTask = new CfnReplicationTask(this, replicationTaskIdentifier, {
       replicationInstanceArn: this.instance.ref,
@@ -298,7 +297,7 @@ class DmsReplication extends Construct {
       migrationType: migrationType || 'full-load',
       sourceEndpointArn: source.ref,
       targetEndpointArn: target.ref,
-      replicationTaskSettings: JSON.stringify(replicationTaskSettings),
+      replicationTaskSettings: JSON.stringify(TaskSettings),
       tableMappings: JSON.stringify({
         rules: [
           {

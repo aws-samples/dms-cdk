@@ -1,21 +1,20 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { ContextProps } from '../lib/context-props';
+import * as fs from 'fs';
 import DmsStack from '../lib/dms-stack';
 
 const app = new cdk.App();
 
-const environment = app.node.tryGetContext('environment');
-const context: ContextProps = app.node.tryGetContext(environment);
-context.environment = environment;
+// get context params
+const env = app.node.tryGetContext('environment');
 
-const account = app.node.tryGetContext('account');
-context.account = account;
+// get context from conf
+const context = JSON.parse(fs.readFileSync('./conf/env.json', 'utf-8'));
 
 new DmsStack(app, 'DmsStack', {
   context,
   env: {
-    account: context.account,
-    region: context.region,
+    account: context[env].account,
+    region: context[env].region,
   },
 });
