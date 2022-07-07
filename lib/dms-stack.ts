@@ -113,7 +113,7 @@ class DmsStack extends cdk.Stack {
       }
 
       this.dmsReplication.createReplicationTask(
-        `${schema.name}-replication-${suffix}`,
+        `${schemaName}-replication-${suffix}`,
         source,
         target,
         schema.migrationType,
