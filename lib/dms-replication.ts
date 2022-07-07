@@ -10,7 +10,7 @@ import {
 } from 'aws-cdk-lib/aws-dms';
 import { Construct } from 'constructs';
 import { DmsProps } from './dms-props';
-import TaskSettings from '../conf/task_settings.json';
+import { TaskSettings } from '../conf/task_settings.json';
 
 class DmsReplication extends Construct {
   private instance: dms.CfnReplicationInstance;
@@ -252,10 +252,10 @@ class DmsReplication extends Construct {
    */
   public createReplicationTask(
     replicationTaskIdentifier: string,
-    schema: string,
     source: CfnEndpoint,
     target: CfnEndpoint,
-    migrationType?: 'cdc' | 'full-load' | 'full-load-and-cdc'
+    migrationType: 'cdc' | 'full-load' | 'full-load-and-cdc',
+    rules: string
   ): CfnReplicationTask {
     const replicationTask = new CfnReplicationTask(this, replicationTaskIdentifier, {
       replicationInstanceArn: this.instance.ref,
@@ -264,22 +264,8 @@ class DmsReplication extends Construct {
       sourceEndpointArn: source.ref,
       targetEndpointArn: target.ref,
       replicationTaskSettings: JSON.stringify(TaskSettings),
-      tableMappings: JSON.stringify({
-        rules: [
-          {
-            'rule-type': 'selection',
-            'rule-id': '1',
-            'rule-name': '1',
-            'object-locator': {
-              'schema-name': schema,
-              'table-name': '%',
-            },
-            'rule-action': 'include',
-          },
-        ],
-      }),
+      tableMappings: rules,
     });
-
     return replicationTask;
   }
 }

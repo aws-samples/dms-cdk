@@ -25,6 +25,20 @@ test('init stack', () => {
         migrationType: 'full-load',
         engineName: 'mysql',
         targetEngineName: 'oracle',
+        rules: JSON.stringify({
+          rules: [
+            {
+              'rule-type': 'selection',
+              'rule-id': '1',
+              'rule-name': '1',
+              'object-locator': {
+                'schema-name': 'demo_test',
+                'table-name': '%',
+              },
+              'rule-action': 'include',
+            },
+          ],
+        }),
       },
     ],
     publiclyAccessible: false,
@@ -34,7 +48,6 @@ test('init stack', () => {
       region: 'eu-central-1',
     },
   });
-
 
   template = Template.fromStack(stack);
 });
@@ -63,7 +76,6 @@ test('should allocated storage AWS::DMS::ReplicationInstance', () => {
 });
 
 test('target endpoint created with correct attributes', () => {
-
   template.hasResourceProperties('AWS::DMS::Endpoint', {
     EndpointType: 'source',
     EngineName: 'mysql',

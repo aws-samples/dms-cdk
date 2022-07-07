@@ -27,6 +27,20 @@ test('init stack', () => {
         migrationType: 'cdc',
         engineName: 'oracle',
         targetEngineName: 'aurora-postgresql',
+        rules: JSON.stringify({
+          rules: [
+            {
+              'rule-type': 'selection',
+              'rule-id': '1',
+              'rule-name': '1',
+              'object-locator': {
+                'schema-name': 'test',
+                'table-name': '%',
+              },
+              'rule-action': 'include',
+            },
+          ],
+        }),
       },
     ],
     publiclyAccessible: true,
@@ -53,6 +67,20 @@ test('init stack', () => {
         migrationType: 'full-load',
         engineName: 'mysql',
         targetEngineName: 'mysql',
+        rules: JSON.stringify({
+          rules: [
+            {
+              'rule-type': 'selection',
+              'rule-id': '1',
+              'rule-name': '1',
+              'object-locator': {
+                'schema-name': 'Database_1',
+                'table-name': '%',
+              },
+              'rule-action': 'include',
+            },
+          ],
+        }),
       },
       {
         name: 'Database_2',
@@ -61,6 +89,20 @@ test('init stack', () => {
         migrationType: 'cdc',
         engineName: 'mysql',
         targetEngineName: 'sqlserver',
+        rules: JSON.stringify({
+          rules: [
+            {
+              'rule-type': 'selection',
+              'rule-id': '1',
+              'rule-name': '1',
+              'object-locator': {
+                'schema-name': 'Database_2',
+                'table-name': '%',
+              },
+              'rule-action': 'include',
+            },
+          ],
+        }),
       },
       {
         name: 'Database_3',
@@ -69,6 +111,20 @@ test('init stack', () => {
         migrationType: 'full-load',
         engineName: 'mysql',
         targetEngineName: 'aurora-postgresql',
+        rules: JSON.stringify({
+          rules: [
+            {
+              'rule-type': 'selection',
+              'rule-id': '1',
+              'rule-name': '1',
+              'object-locator': {
+                'schema-name': 'Database_3',
+                'table-name': '%',
+              },
+              'rule-action': 'include',
+            },
+          ],
+        }),
       },
     ],
     publiclyAccessible: false,

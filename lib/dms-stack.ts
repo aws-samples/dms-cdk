@@ -17,7 +17,9 @@ class DmsStack extends cdk.Stack {
       let source;
       let target;
 
+      // endpoints cannot have underscore
       const schemaName = schema.name.includes('_') ? schema.name.replace('_', '-') : schema.name;
+
       // source
       switch (schema.engineName) {
         case 'mysql':
@@ -112,10 +114,10 @@ class DmsStack extends cdk.Stack {
 
       this.dmsReplication.createReplicationTask(
         `${schema.name}-replication-${suffix}`,
-        schema.name,
         source,
         target,
-        schema.migrationType
+        schema.migrationType,
+        schema.rules
       );
     });
   }

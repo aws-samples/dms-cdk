@@ -32,6 +32,9 @@ export declare type SchemaConfig = {
 
   /** Database name for oracle and postgres */
   databaseName?: string;
+
+  /** Mapping or Transformation rules */
+  rules: string;
 };
 
 export declare type DmsProps = cdk.StackProps & {
