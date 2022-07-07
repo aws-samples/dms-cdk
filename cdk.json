@@ -18,7 +18,7 @@
   },
   "context": {
     "dev": {
-      "account": "783795652744",
+      "account": "1111111111111111",
       "region": "eu-central-1",
       "vpcId": "vpc-0903b65ff19ea935a",
       "subnetIds": [
@@ -32,8 +32,8 @@
           "engineName": "oracle",
           "targetEngineName": "aurora-postgresql",
           "databaseName": "demo-orcl-db",
-          "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:783795652744:secret:dev/target-Tsnx24",
-          "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:783795652744:secret:dev/target-Tsnx24",
+          "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:1111111111111111:secret:dev/target-Tsnx24",
+          "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:1111111111111111:secret:dev/target-Tsnx24",
           "tableMappings": {
             "rules": [
               {
