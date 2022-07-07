@@ -27,13 +27,13 @@
       ],
       "schemas": [
         {
-          "name": "DMS_SAMPLE",
+          "name": "demo-oracle-db",
           "migrationType": "full-load",
           "engineName": "oracle",
           "targetEngineName": "aurora-postgresql",
-          "databaseName": "oradev",
-          "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:783795652744:secret:kmstan_dms_source_db-APs9MM",
-          "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:783795652744:secret:kmstan-dms-target-db-T0cQeQ",
+          "databaseName": "demo-orcl-db",
+          "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:783795652744:secret:dev/target-Tsnx24",
+          "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:783795652744:secret:dev/target-Tsnx24",
           "tableMappings": {
             "rules": [
               {
@@ -113,7 +113,7 @@
           }
         }
       ],
-      "replicationInstanceClass": "dms.r5.large",
+      "replicationInstanceClass": "dms.t3.medium",
       "replicationInstanceIdentifier": "dms-dev-eu",
       "replicationSubnetGroupIdentifier": "dms-dev-subnet-eu",
       "replicationTaskSettings": {},
