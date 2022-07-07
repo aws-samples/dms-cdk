@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable jest/expect-expect */
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
@@ -25,20 +26,20 @@ test('init stack', () => {
         migrationType: 'full-load',
         engineName: 'mysql',
         targetEngineName: 'oracle',
-        rules: JSON.stringify({
+        tableMappings: {
           rules: [
             {
               'rule-type': 'selection',
               'rule-id': '1',
               'rule-name': '1',
               'object-locator': {
-                'schema-name': 'demo_test',
+                'schema-name': 'demo_schema',
                 'table-name': '%',
               },
               'rule-action': 'include',
             },
           ],
-        }),
+        },
       },
     ],
     publiclyAccessible: false,
@@ -96,29 +97,120 @@ test('create replication task', () => {
     MigrationType: 'full-load',
     ReplicationTaskIdentifier: 'demo_test-replication-test-repl-01',
     TableMappings:
-      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"demo_test","table-name":"%"},"rule-action":"include"}]}',
+      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"demo_schema","table-name":"%"},"rule-action":"include"}]}',
   });
 });
 
-// Create oracle endpoint
-// test('oracle endpoint created with correct attributes', () => {
-//   const app = new cdk.App();
-//   const dmsOracleProps = {
-//     subnetIds: ['subnet-1', 'subnet-2'],
-//     replicationInstanceClass: 'dms-oracle',
-//     replicationInstanceIdentifier: 'test-repl-02',
-//     replicationSubnetGroupIdentifier: 'subnet-group-oracle',
-//     vpcSecurityGroupIds: ['vpc-security'],
-//     engineName: 'oracle',
-//     region: 'eu-west-1',
-//     engineVersion: '3.4.7',
-//   };
+// Oracle transformation rules test
+test('oracle transformation rules and attributes', () => {
+  const app = new cdk.App();
+  const oracleStack = new DmsStack(app, 'DmsOraclePostGresStack', {
+    vpcId: 'vpc-id',
+    subnetIds: ['subnet-1a', 'subnet-1b'],
+    replicationInstanceClass: 'dms.r5.4xlarge',
+    replicationInstanceIdentifier: 'test-repl-01',
+    replicationSubnetGroupIdentifier: 'subnet-group',
+    vpcSecurityGroupIds: ['vpc-sg'],
+    engineVersion: '3.4.6',
+    schemas: [
+      {
+        name: 'demo_stack',
+        sourceSecretsManagerSecretId: 'sourceSecretsManagerSecretId',
+        targetSecretsManagerSecretId: 'targetSecretsManagerSecretId',
+        migrationType: 'cdc',
+        engineName: 'oracle',
+        targetEngineName: 'aurora-postgresql',
+        tableMappings: {
+          rules: [
+            {
+              'rule-type': 'transformation',
+              'rule-id': '1',
+              'rule-name': 'Default Lowercase Table Rule',
+              'rule-target': 'table',
+              'object-locator': {
+                'schema-name': 'DMS_SAMPLE',
+                'table-name': '%',
+              },
+              'rule-action': 'convert-lowercase',
+              'value': null,
+              'old-value': null
+            },
+            {
+              'rule-type': 'transformation',
+              'rule-id': '2',
+              'rule-name': 'Default Lowercase Schema Rule',
+              'rule-action': 'convert-lowercase',
+              'rule-target': 'schema',
+              'object-locator': {
+                'schema-name': 'DMS_SAMPLE',
+              },
+            },
+            {
+              'rule-type': 'transformation',
+              'rule-id': '3',
+              'rule-name': 'Default Lowercase Column Rule',
+              'rule-action': 'convert-lowercase',
+              'rule-target': 'column',
+              'object-locator': {
+                'schema-name': 'DMS_SAMPLE',
+                'table-name': '%',
+                'column-name': '%',
+              },
+            },
+            {
+              'rule-type': 'transformation',
+              'rule-id': '10',
+              'rule-name': 'Rename Schema Rule',
+              'rule-target': 'schema',
+              'object-locator': {
+                'schema-name': 'DMS_SAMPLE',
+              },
+              'rule-action': 'rename',
+              'value': 'dms_sample',
+              'old-value': null
+            },
+            {
+              'rule-type': 'selection',
+              'rule-id': '11',
+              'rule-name': 'Selection Rule DMS_SAMPLE',
+              'object-locator': {
+                'schema-name': 'DMS_SAMPLE',
+                'table-name': '%',
+              },
+              'rule-action': 'include',
+              'filters': []
+            },
+            {
+              'rule-action': 'change-data-type',
+              'object-locator': {
+                'schema-name': 'DMS_SAMPLE',
+                'column-name': 'COL1_NUMBER_INT',
+                'table-name': 'SAMPLE_NUMBER_DATA_TYPE',
+              },
+              'rule-target': 'column',
+              'rule-type': 'transformation',
+              'rule-id': '1',
+              'data-type': {
+                'type': 'numeric',
+              },
+              'rule-name': '30',
+            },
+          ],
+        },
+      },
+    ],
+    publiclyAccessible: true,
+    allocatedStorage: 50,
+    env: {
+      account: '11111111111',
+      region: 'eu-central-1',
+    },
+  });
 
-//   const oracleStack = new DmsStack(app, 'DmsOracleTestStack', dmsOracleProps);
-//   const oracleTemplate = Template.fromStack(oracleStack);
+  const oracleTemplate = Template.fromStack(oracleStack);
 
-//   oracleTemplate.hasResourceProperties('AWS::DMS::Endpoint', {
-//     EndpointType: 'source',
-//     EngineName: 'oracle',
-//   });
-// });
+  oracleTemplate.hasResourceProperties('AWS::DMS::Endpoint', {
+    EndpointType: 'source',
+    EngineName: 'oracle',
+  });
+});

@@ -27,20 +27,20 @@ test('init stack', () => {
         migrationType: 'cdc',
         engineName: 'oracle',
         targetEngineName: 'aurora-postgresql',
-        rules: JSON.stringify({
+        tableMappings: {
           rules: [
             {
               'rule-type': 'selection',
               'rule-id': '1',
               'rule-name': '1',
               'object-locator': {
-                'schema-name': 'test',
+                'schema-name': 'demo_test',
                 'table-name': '%',
               },
               'rule-action': 'include',
             },
           ],
-        }),
+        },
       },
     ],
     publiclyAccessible: true,
@@ -61,13 +61,13 @@ test('init stack', () => {
     engineVersion: '3.4.6',
     schemas: [
       {
-        name: 'Database_1',
+        name: 'task_1',
         sourceSecretsManagerSecretId: 'sourceSecretsManagerSecretId',
         targetSecretsManagerSecretId: 'targetSecretsManagerSecretId',
         migrationType: 'full-load',
         engineName: 'mysql',
         targetEngineName: 'mysql',
-        rules: JSON.stringify({
+        tableMappings: {
           rules: [
             {
               'rule-type': 'selection',
@@ -80,16 +80,16 @@ test('init stack', () => {
               'rule-action': 'include',
             },
           ],
-        }),
+        },
       },
       {
-        name: 'Database_2',
+        name: 'task_2',
         sourceSecretsManagerSecretId: 'sourceSecretsManagerSecretId',
         targetSecretsManagerSecretId: 'targetSecretsManagerSecretId',
         migrationType: 'cdc',
         engineName: 'mysql',
         targetEngineName: 'sqlserver',
-        rules: JSON.stringify({
+        tableMappings: {
           rules: [
             {
               'rule-type': 'selection',
@@ -102,16 +102,16 @@ test('init stack', () => {
               'rule-action': 'include',
             },
           ],
-        }),
+        },
       },
       {
-        name: 'Database_3',
+        name: 'task_3',
         sourceSecretsManagerSecretId: 'sourceSecretsManagerSecretId',
         targetSecretsManagerSecretId: 'targetSecretsManagerSecretId',
         migrationType: 'full-load',
         engineName: 'mysql',
         targetEngineName: 'aurora-postgresql',
-        rules: JSON.stringify({
+        tableMappings: {
           rules: [
             {
               'rule-type': 'selection',
@@ -124,7 +124,7 @@ test('init stack', () => {
               'rule-action': 'include',
             },
           ],
-        }),
+        },
       },
     ],
     publiclyAccessible: false,

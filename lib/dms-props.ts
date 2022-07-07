@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import { Rules } from './rules-props';
 
 export declare type SchemaConfig = {
   name: string;
@@ -34,7 +35,7 @@ export declare type SchemaConfig = {
   databaseName?: string;
 
   /** Mapping or Transformation rules */
-  rules: string;
+  tableMappings: Rules;
 };
 
 export declare type DmsProps = cdk.StackProps & {

@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 /* eslint-disable camelcase */
 import * as dms from 'aws-cdk-lib/aws-dms';
 import * as cdk from 'aws-cdk-lib';
@@ -11,6 +12,7 @@ import {
 import { Construct } from 'constructs';
 import { DmsProps } from './dms-props';
 import { TaskSettings } from '../conf/task_settings.json';
+import { Rules } from './rules-props';
 
 class DmsReplication extends Construct {
   private instance: dms.CfnReplicationInstance;
@@ -255,7 +257,7 @@ class DmsReplication extends Construct {
     source: CfnEndpoint,
     target: CfnEndpoint,
     migrationType: 'cdc' | 'full-load' | 'full-load-and-cdc',
-    rules: string
+    rules: Rules
   ): CfnReplicationTask {
     const replicationTask = new CfnReplicationTask(this, replicationTaskIdentifier, {
       replicationInstanceArn: this.instance.ref,
@@ -264,7 +266,7 @@ class DmsReplication extends Construct {
       sourceEndpointArn: source.ref,
       targetEndpointArn: target.ref,
       replicationTaskSettings: JSON.stringify(TaskSettings),
-      tableMappings: rules,
+      tableMappings: JSON.stringify(rules),
     });
     return replicationTask;
   }

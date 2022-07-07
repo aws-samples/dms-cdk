@@ -117,7 +117,7 @@ class DmsStack extends cdk.Stack {
         source,
         target,
         schema.migrationType,
-        schema.rules
+        schema.tableMappings
       );
     });
   }
