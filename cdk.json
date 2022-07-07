@@ -18,22 +18,22 @@
   },
   "context": {
     "dev": {
-      "account": "783795652744",
+      "account": "944655128726",
       "region": "eu-central-1",
-      "vpcId": "vpc-0903b65ff19ea935a",
+      "vpcId": "vpc-00a9d0da76b1f3866",
       "subnetIds": [
-        "subnet-04aa811913ec69967",
-        "subnet-003766127b40d89aa"
+        "subnet-06dac479296870e82",
+        "subnet-025851c51243b1fce"
       ],
       "schemas": [
         {
-          "name": "demo-oracle-db",
+          "name": "DMS_SAMPLE",
           "migrationType": "full-load",
           "engineName": "oracle",
           "targetEngineName": "aurora-postgresql",
-          "databaseName": "demo-orcl-db",
-          "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:783795652744:secret:dev/target-Tsnx24",
-          "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:783795652744:secret:dev/target-Tsnx24",
+          "databaseName": "oradev",
+          "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:944655128726:secret:kmstan_dms_source_db-APs9MM",
+          "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:944655128726:secret:kmstan-dms-target-db-T0cQeQ",
           "tableMappings": {
             "rules": [
               {
@@ -113,7 +113,7 @@
           }
         }
       ],
-      "replicationInstanceClass": "dms.t3.medium",
+      "replicationInstanceClass": "dms.r5.large",
       "replicationInstanceIdentifier": "dms-dev-eu",
       "replicationSubnetGroupIdentifier": "dms-dev-subnet-eu",
       "replicationTaskSettings": {},

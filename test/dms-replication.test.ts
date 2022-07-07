@@ -95,7 +95,7 @@ test('target endpoint created with correct attributes', () => {
 test('create replication task', () => {
   template.hasResourceProperties('AWS::DMS::ReplicationTask', {
     MigrationType: 'full-load',
-    ReplicationTaskIdentifier: 'demo_test-replication-test-repl-01',
+    ReplicationTaskIdentifier: 'demo-test-replication-test-repl-01',
     TableMappings:
       '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"demo_schema","table-name":"%"},"rule-action":"include"}]}',
   });
