@@ -2,76 +2,150 @@
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import DmsStack from '../lib/dms-stack';
-import { ContextProps } from '../lib/context-props';
 
-let stack: DmsStack;
+let stackOracleToPostgres: DmsStack;
+let stackMultiSchemaMySql: DmsStack;
 let template: Template;
-
-const app = new cdk.App();
-const contextProps: ContextProps = {
-  environment: 'dev',
-  account: '',
-  region: '',
-  vpcId: 'test-vpc',
-  vpcSecurityGroupIds: ['vpc-sg'],
-  subnetIds: ['subnet-1', 'subnet-2'],
-  schemas: [
-    {
-      name: 'Database_1',
-      sourceSecretsManagerSecretId: 'sourceSecretId',
-      sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
-      targetSecretsManagerSecretId: 'targetSecretIdDatabase1',
-      targetSecretsManagerRoleArn: 'targetSecretRoleDatabase1',
-    },
-    {
-      name: 'Database_2',
-      sourceSecretsManagerSecretId: 'sourceSecretId',
-      sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
-      targetSecretsManagerSecretId: 'targetSecretIdDatabase2',
-      targetSecretsManagerRoleArn: 'targetSecretRoleDatabase2',
-    },
-    {
-      name: 'Database_3',
-      sourceSecretsManagerSecretId: 'sourceSecretId',
-      sourceSecretsManagerRoleArn: 'sourceSecretRoleArn',
-      targetSecretsManagerSecretId: 'targetSecretIdDatabase3',
-      targetSecretsManagerRoleArn: 'targetSecretRoleDatabase3',
-    },
-  ],
-  replicationInstanceClass: 'dms.r5.4xlarge',
-  replicationInstanceIdentifier: 'replication-id',
-  replicationSubnetGroupIdentifier: 'test-replication-id',
-  replicationTaskSettings: {
-    ValidationSettings: {
-      EnableValidation: true,
-      ThreadCount: 15,
-    },
-    Logging: {
-      EnableLogging: false,
-    },
-  },
-  migrationType: 'full-load',
-  engineVersion: '3.4.6',
-  engineName: 'oracle',
-  targetEngineName: 'mysql',
-  databaseName: 'demo-db',
-  publiclyAccessible: true,
-};
+let multiSchemaTemplate: Template;
 
 test('init stack', () => {
-  const dmsProps = { context: contextProps };
+  const app = new cdk.App();
 
-  stack = new DmsStack(app, 'MyDmsStack', dmsProps);
-  template = Template.fromStack(stack);
+  stackOracleToPostgres = new DmsStack(app, 'DmsOraclePostGresStack', {
+    vpcId: 'vpc-id',
+    subnetIds: ['subnet-1a', 'subnet-1b'],
+    replicationInstanceClass: 'dms.r5.4xlarge',
+    replicationInstanceIdentifier: 'test-repl-01',
+    replicationSubnetGroupIdentifier: 'subnet-group',
+    vpcSecurityGroupIds: ['vpc-sg'],
+    engineVersion: '3.4.6',
+    tasks: [
+      {
+        name: 'demo_stack',
+        sourceSecretsManagerSecretId: 'sourceSecretsManagerSecretId',
+        targetSecretsManagerSecretId: 'targetSecretsManagerSecretId',
+        migrationType: 'cdc',
+        engineName: 'oracle',
+        targetEngineName: 'aurora-postgresql',
+        tableMappings: {
+          rules: [
+            {
+              'rule-type': 'selection',
+              'rule-id': '1',
+              'rule-name': '1',
+              'object-locator': {
+                'schema-name': 'demo_test',
+                'table-name': '%',
+              },
+              'rule-action': 'include',
+            },
+          ],
+        },
+      },
+    ],
+    publiclyAccessible: true,
+    allocatedStorage: 50,
+    env: {
+      account: '11111111111',
+      region: 'eu-central-1',
+    },
+  });
+
+  stackMultiSchemaMySql = new DmsStack(app, 'DmsMultiSchemaStack', {
+    vpcId: 'vpc-id',
+    subnetIds: ['subnet-1a', 'subnet-1b'],
+    replicationInstanceClass: 'dms.r5.4xlarge',
+    replicationInstanceIdentifier: 'test-repl-01',
+    replicationSubnetGroupIdentifier: 'subnet-group',
+    vpcSecurityGroupIds: ['vpc-sg'],
+    engineVersion: '3.4.6',
+    tasks: [
+      {
+        name: 'task_1',
+        sourceSecretsManagerSecretId: 'sourceSecretsManagerSecretId',
+        targetSecretsManagerSecretId: 'targetSecretsManagerSecretId',
+        migrationType: 'full-load',
+        engineName: 'mysql',
+        targetEngineName: 'mysql',
+        tableMappings: {
+          rules: [
+            {
+              'rule-type': 'selection',
+              'rule-id': '1',
+              'rule-name': '1',
+              'object-locator': {
+                'schema-name': 'Database_1',
+                'table-name': '%',
+              },
+              'rule-action': 'include',
+            },
+          ],
+        },
+      },
+      {
+        name: 'task_2',
+        sourceSecretsManagerSecretId: 'sourceSecretsManagerSecretId',
+        targetSecretsManagerSecretId: 'targetSecretsManagerSecretId',
+        migrationType: 'cdc',
+        engineName: 'mysql',
+        targetEngineName: 'sqlserver',
+        tableMappings: {
+          rules: [
+            {
+              'rule-type': 'selection',
+              'rule-id': '1',
+              'rule-name': '1',
+              'object-locator': {
+                'schema-name': 'Database_2',
+                'table-name': '%',
+              },
+              'rule-action': 'include',
+            },
+          ],
+        },
+      },
+      {
+        name: 'task_3',
+        sourceSecretsManagerSecretId: 'sourceSecretsManagerSecretId',
+        targetSecretsManagerSecretId: 'targetSecretsManagerSecretId',
+        migrationType: 'full-load',
+        engineName: 'mysql',
+        targetEngineName: 'aurora-postgresql',
+        tableMappings: {
+          rules: [
+            {
+              'rule-type': 'selection',
+              'rule-id': '1',
+              'rule-name': '1',
+              'object-locator': {
+                'schema-name': 'Database_3',
+                'table-name': '%',
+              },
+              'rule-action': 'include',
+            },
+          ],
+        },
+      },
+    ],
+    publiclyAccessible: false,
+    allocatedStorage: 50,
+    env: {
+      account: '11111111111',
+      region: 'eu-central-1',
+    },
+  });
+
+  template = Template.fromStack(stackOracleToPostgres);
+  multiSchemaTemplate = Template.fromStack(stackMultiSchemaMySql);
 });
 
-test('AWS::DMS::ReplicationSubnetGroup', () => {
+test('subnet group', () => {
   template.hasResourceProperties('AWS::DMS::ReplicationSubnetGroup', {
-    SubnetIds: ['subnet-1', 'subnet-2'],
+    SubnetIds: ['subnet-1a', 'subnet-1b'],
   });
 });
 
-test('AWS::DMS::ReplicationInstance', () => {
+test('replication instance class and engine version', () => {
   template.hasResourceProperties('AWS::DMS::ReplicationInstance', {
     ReplicationInstanceClass: 'dms.r5.4xlarge',
     VpcSecurityGroupIds: ['vpc-sg'],
@@ -79,50 +153,28 @@ test('AWS::DMS::ReplicationInstance', () => {
   });
 });
 
-test('Target AWS::DMS::Endpoint', () => {
-  template.hasResourceProperties('AWS::DMS::Endpoint', {
-    EndpointType: 'target',
-    MySqlSettings: {
-      SecretsManagerSecretId: 'targetSecretIdDatabase1',
-    },
-  });
-
-  template.hasResourceProperties('AWS::DMS::Endpoint', {
-    EndpointType: 'target',
-    MySqlSettings: {
-      SecretsManagerSecretId: 'targetSecretIdDatabase2',
-    },
-  });
-
-  template.hasResourceProperties('AWS::DMS::Endpoint', {
-    EndpointType: 'target',
-    MySqlSettings: {
-      SecretsManagerSecretId: 'targetSecretIdDatabase3',
-    },
-  });
-
-  template.resourceCountIs('AWS::DMS::Endpoint', 6);
-});
-
-test('Source Oracle AWS::DMS::Endpoint', () => {
+test('DMS endpoints', () => {
   template.hasResourceProperties('AWS::DMS::Endpoint', {
     EndpointType: 'source',
+    EndpointIdentifier: 'source-demo-stack-test-repl-01',
     EngineName: 'oracle',
-    DatabaseName: 'demo-db',
+    ExtraConnectionAttributes: 'addSupplementalLogging=true',
     OracleSettings: {
-      SecretsManagerSecretId: 'sourceSecretId',
+      SecretsManagerSecretId: 'sourceSecretsManagerSecretId',
     },
   });
-});
 
-test('AWS::DMS::ReplicationTask TableMappings', () => {
-  template.hasResourceProperties('AWS::DMS::ReplicationTask', {
-    MigrationType: 'full-load',
-    TableMappings:
-      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"Database_1","table-name":"%"},"rule-action":"include"}]}',
+  template.hasResourceProperties('AWS::DMS::Endpoint', {
+    EndpointType: 'target',
+    EndpointIdentifier: 'target-demo-stack-test-repl-01',
+    EngineName: 'aurora-postgresql',
+    ExtraConnectionAttributes: 'executeTimeout=180',
+    PostgreSqlSettings: {
+      SecretsManagerSecretId: 'targetSecretsManagerSecretId',
+    },
   });
 
-  template.resourceCountIs('AWS::DMS::ReplicationTask', 3);
+  template.resourceCountIs('AWS::DMS::Endpoint', 2);
 });
 
 test('Publicly accessible is true', () => {
@@ -130,4 +182,28 @@ test('Publicly accessible is true', () => {
     ReplicationInstanceClass: 'dms.r5.4xlarge',
     PubliclyAccessible: true,
   });
+});
+
+// Multiple schemas test
+test('Multiple schemas test', () => {
+  multiSchemaTemplate.hasResourceProperties('AWS::DMS::ReplicationTask', {
+    MigrationType: 'full-load',
+    TableMappings:
+      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"Database_1","table-name":"%"},"rule-action":"include"}]}',
+  });
+
+  multiSchemaTemplate.hasResourceProperties('AWS::DMS::ReplicationTask', {
+    MigrationType: 'cdc',
+    TableMappings:
+      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"Database_2","table-name":"%"},"rule-action":"include"}]}',
+  });
+
+  multiSchemaTemplate.hasResourceProperties('AWS::DMS::ReplicationTask', {
+    MigrationType: 'full-load',
+    TableMappings:
+      '{"rules":[{"rule-type":"selection","rule-id":"1","rule-name":"1","object-locator":{"schema-name":"Database_3","table-name":"%"},"rule-action":"include"}]}',
+  });
+
+  multiSchemaTemplate.resourceCountIs('AWS::DMS::ReplicationTask', 3);
+  multiSchemaTemplate.resourceCountIs('AWS::DMS::ReplicationInstance', 1);
 });

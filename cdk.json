@@ -1,34 +1,123 @@
 {
   "app": "npx ts-node --prefer-ts-exts bin/dms-cdk.ts",
+  "watch": {
+    "include": [
+      "**"
+    ],
+    "exclude": [
+      "README.md",
+      "cdk*.json",
+      "**/*.d.ts",
+      "**/*.js",
+      "tsconfig.json",
+      "package*.json",
+      "yarn.lock",
+      "node_modules",
+      "test"
+    ]
+  },
   "context": {
-    "environment": "dev",
-    "account": "111111111111",
-
     "dev": {
+      "account": "99999999999",
       "region": "eu-central-1",
-      "vpcId": "vpc-xxxxx",
+      "vpcId": "vpc-xxxxxxxx",
       "subnetIds": [
-        "subnet-xxxx-a",
-        "subnet-xxxx-b"
+        "subnet-a",
+        "subnet-b"
       ],
-      "schemas": [
+      "tasks": [
         {
-          "name": "my_demo_db",
-          "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:111111111111:secret:dev/source-xxxx",
-          "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:111111111111:secret:dev/target-xxxxx"
+          "name": "DMS_SAMPLE",
+          "migrationType": "full-load",
+          "engineName": "oracle",
+          "targetEngineName": "aurora-postgresql",
+          "databaseName": "oradev",
+          "sourceSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:99999999999:secret:kmstan_dms_source_db-APs9MM",
+          "targetSecretsManagerSecretId": "arn:aws:secretsmanager:eu-central-1:99999999999:secret:kmstan-dms-target-db-T0cQeQ",
+          "tableMappings": {
+            "rules": [
+              {
+                "rule-type": "transformation",
+                "rule-id": "1",
+                "rule-name": "Default Lowercase Table Rule",
+                "rule-target": "table",
+                "object-locator": {
+                  "schema-name": "DMS_SAMPLE",
+                  "table-name": "%"
+                },
+                "rule-action": "convert-lowercase",
+                "value": null,
+                "old-value": null
+              },
+              {
+                "rule-type": "transformation",
+                "rule-id": "2",
+                "rule-name": "Default Lowercase Schema Rule",
+                "rule-action": "convert-lowercase",
+                "rule-target": "schema",
+                "object-locator": {
+                  "schema-name": "DMS_SAMPLE"
+                }
+              },
+              {
+                "rule-type": "transformation",
+                "rule-id": "3",
+                "rule-name": "Default Lowercase Column Rule",
+                "rule-action": "convert-lowercase",
+                "rule-target": "column",
+                "object-locator": {
+                  "schema-name": "DMS_SAMPLE",
+                  "table-name": "%",
+                  "column-name": "%"
+                }
+              },
+              {
+                "rule-type": "transformation",
+                "rule-id": "10",
+                "rule-name": "Rename Schema Rule",
+                "rule-target": "schema",
+                "object-locator": {
+                  "schema-name": "DMS_SAMPLE"
+                },
+                "rule-action": "rename",
+                "value": "dms_sample",
+                "old-value": null
+              },
+              {
+                "rule-type": "selection",
+                "rule-id": "11",
+                "rule-name": "Selection Rule DMS_SAMPLE",
+                "object-locator": {
+                  "schema-name": "DMS_SAMPLE",
+                  "table-name": "%"
+                },
+                "rule-action": "include",
+                "filters": []
+              },
+              {
+                "rule-action": "change-data-type",
+                "object-locator": {
+                  "schema-name": "DMS_SAMPLE",
+                  "column-name": "COL1_NUMBER_INT",
+                  "table-name": "SAMPLE_NUMBER_DATA_TYPE"
+                },
+                "rule-target": "column",
+                "rule-type": "transformation",
+                "rule-id": "12",
+                "data-type": {
+                  "type": "int8"
+                },
+                "rule-name": "30"
+              }
+            ]
+          }
         }
       ],
-      "replicationInstanceClass": "dms.t3.medium",
+      "replicationInstanceClass": "dms.r5.large",
       "replicationInstanceIdentifier": "dms-dev-eu",
       "replicationSubnetGroupIdentifier": "dms-dev-subnet-eu",
-      "replicationTaskSettings": {
-      },
-      "migrationType": "full-load",
-      "engineName": "oracle",
-      "targetEngineName": "aurora-postgresql",
-      "databaseName": "demo-db",
+      "replicationTaskSettings": {},
       "publiclyAccessible": false
     }
   }
-
 }

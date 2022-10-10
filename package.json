@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "aws-cdk-lib": "2.30.0",
-    "cdk-assets": "2.29.1",
+    "cdk-assets": "2.31.0",
     "constructs": "10.1.1",
     "npm": "8.11.0",
     "promptly": "3.2.0",

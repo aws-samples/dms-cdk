@@ -169,32 +169,49 @@ The solution is primarily designed for RDS MySQL database. However, it can easil
 
 
     ```
+      import * as cdk from 'aws-cdk-lib';
+      import DmsStack from '../lib/dms-stack';
 
-    import * as cdk from 'aws-cdk-lib';
-    import { DmsReplication } from '../lib/dms-replication';
-
-    class DemoDmsStack extends cdk.Stack {
-      constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
-        super(scope, id, props);
-
-        const dmsProps = {
-          subnetIds: ['subnet-1', 'subnet-2'],
-          replicationSubnetGroupIdentifier: 'dms-subnet-private',
-          replicationInstanceClass: 'dms-replication-instance-t3',
-          replicationInstanceIdentifier: 'dms-mysql-dev',
-          vpcSecurityGroupIds: ['sg-xxxx'],
-          engineName: 'mysql',
-          region: cdk.Stack.of(this).region,
-        };
-
-        const dmsReplication = new DmsReplication(this, 'DMSReplicationService', dmsProps);
-        const source = dmsReplication.createMySQLEndpoint('db-on-source', 'source', 'sourceSecretsManagerSecretId');
-        const target = dmsReplication.createMySQLEndpoint('rds-target', 'target', 'targetSecretsManagerSecretId');
-
-        dmsReplication.createReplicationTask('platform-replication-task', 'platform', source, target);
-      }
-    }
-
+      const app = new cdk.App();
+      const dmsStack = new DmsStack(app, 'DmsOraclePostGresStack', {
+        vpcId: 'vpc-id',
+        subnetIds: ['subnet-1a', 'subnet-1b'],
+        replicationInstanceClass: 'dms.r5.4xlarge',
+        replicationInstanceIdentifier: 'test-repl-01',
+        replicationSubnetGroupIdentifier: 'subnet-group',
+        vpcSecurityGroupIds: ['vpc-sg'],
+        engineVersion: '3.4.6',
+        tasks: [
+          {
+            name: 'demo_stack',
+            sourceSecretsManagerSecretId: 'sourceSecretsManagerSecretId',
+            targetSecretsManagerSecretId: 'targetSecretsManagerSecretId',
+            migrationType: 'cdc',
+            engineName: 'oracle',
+            targetEngineName: 'aurora-postgresql',
+            tableMappings: {
+              rules: [
+                {
+                  'rule-type': 'selection',
+                  'rule-id': '1',
+                  'rule-name': '1',
+                  'object-locator': {
+                    'schema-name': 'demo_test',
+                    'table-name': '%',
+                  },
+                  'rule-action': 'include',
+                },
+              ],
+            },
+          },
+        ],
+        publiclyAccessible: true,
+        allocatedStorage: 50,
+        env: {
+          account: '11111111111',
+          region: 'eu-central-1',
+        },
+      });
     ```
 
 ## Configuration Options
@@ -215,7 +232,7 @@ In the cdk.json file you define the DMS related settings.
 | allocatedStorage                    | Storage space for the replication instance (should be based on log size)       |  50g          |  n       |
 | engineName                          | Supported source databases oracle, postgres, sqlserver, mysql                  | mysql         |  y       |
 | targetEngineName                    | Supported target databases oracle, postgres, sqlserver, aurora-postgresql      | mysql         |  y       |
-| engineVersion                       | DMS engine version                                                             | 3.4.6         |  n       |
+| engineVersion                       | DMS engine version                                                             | 3.4.6, 3.4.7  |  n       |
 | targetEngineVersion                 | The name of target database engine (mysql, oracle and aurora-postgresql)       | mysql         |  n       |
 | databaseName                        | Name of the database to be migrated. Relavant for oracle, postgres...          | false         |  n       |
 | publiclyAccessible                  | DMS endpoint is publicly accessible or not                                     | false         |  n       |
