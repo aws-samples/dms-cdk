@@ -1,5 +1,7 @@
+/* eslint-disable import/prefer-default-export */
 /* eslint-disable camelcase */
 import * as dms from 'aws-cdk-lib/aws-dms';
+import * as cdk from 'aws-cdk-lib';
 import { Role, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import {
   CfnReplicationSubnetGroup,
@@ -8,43 +10,10 @@ import {
   CfnEndpoint,
 } from 'aws-cdk-lib/aws-dms';
 import { Construct } from 'constructs';
-import { TaskSettings } from './context-props';
-
-export type DmsProps = {
-  subnetIds: string[];
-  replicationInstanceClass?: string;
-  replicationInstanceIdentifier: string;
-  replicationSubnetGroupIdentifier: string;
-  vpcSecurityGroupIds: string[];
-  allocatedStorage?: number;
-  publiclyAccessible?: boolean;
-  region: string;
-  engineVersion?: string;
-  engineName?: string;
-  targetEngineName?: string;
-};
-
-/**
- * Returns default sets of properties
- *
- * @param props
- * @returns
- */
-function getPropsWithDefaults(props: DmsProps) {
-  const propsWithDefaults = {
-    replicationInstanceClass: 'dms.t3.medium',
-    sourceDBPort: 3306,
-    targetDBPort: 3306,
-    allocatedStorage: 50,
-    engineName: 'mysql',
-    targetEngineName: 'aurora-postgresql',
-    publiclyAccessible: false,
-    engineVersion: '3.4.6',
-    ...props,
-  };
-
-  return propsWithDefaults;
-}
+import { DmsProps } from './dms-props';
+import { TaskSettings } from '../conf/task_settings.json';
+import { Rules } from './rules-props';
+import { assert } from 'console';
 class DmsReplication extends Construct {
   private instance: dms.CfnReplicationInstance;
 
@@ -55,11 +24,10 @@ class DmsReplication extends Construct {
   constructor(scope: Construct, id: string, props: DmsProps) {
     super(scope, id);
 
-    const resolvedProps = getPropsWithDefaults(props);
     const subnetGrp = this.createSubnetGroup(props);
-    this.region = props.region;
+    this.region = cdk.Stack.of(this).region;
     this.secretsManagerAccessRole = this.createRoleForSecretsManagerAccess();
-    const replicationInstance = this.createReplicationInstance(resolvedProps);
+    const replicationInstance = this.createReplicationInstance(props);
     replicationInstance.addDependsOn(subnetGrp);
 
     this.instance = replicationInstance;
@@ -286,35 +254,21 @@ class DmsReplication extends Construct {
    */
   public createReplicationTask(
     replicationTaskIdentifier: string,
-    schema: string,
     source: CfnEndpoint,
     target: CfnEndpoint,
-    migrationType?: 'cdc' | 'full-load' | 'full-load-and-cdc',
-    replicationTaskSettings?: TaskSettings
+    migrationType: 'cdc' | 'full-load' | 'full-load-and-cdc',
+    rules: Rules
   ): CfnReplicationTask {
-    const replicationTask = new CfnReplicationTask(this, replicationTaskIdentifier, {
+
+      const replicationTask = new CfnReplicationTask(this, replicationTaskIdentifier, {
       replicationInstanceArn: this.instance.ref,
       replicationTaskIdentifier,
       migrationType: migrationType || 'full-load',
       sourceEndpointArn: source.ref,
       targetEndpointArn: target.ref,
-      replicationTaskSettings: JSON.stringify(replicationTaskSettings),
-      tableMappings: JSON.stringify({
-        rules: [
-          {
-            'rule-type': 'selection',
-            'rule-id': '1',
-            'rule-name': '1',
-            'object-locator': {
-              'schema-name': schema,
-              'table-name': '%',
-            },
-            'rule-action': 'include',
-          },
-        ],
-      }),
+      replicationTaskSettings: JSON.stringify(TaskSettings),
+      tableMappings: JSON.stringify(rules),
     });
-
     return replicationTask;
   }
 }

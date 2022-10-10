@@ -1,21 +1,26 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { ContextProps } from '../lib/context-props';
 import DmsStack from '../lib/dms-stack';
 
 const app = new cdk.App();
 
+// get context from conf
 const environment = app.node.tryGetContext('environment');
-const context: ContextProps = app.node.tryGetContext(environment);
-context.environment = environment;
+const ctx = app.node.tryGetContext(environment);
 
-const account = app.node.tryGetContext('account');
-context.account = account;
-
-new DmsStack(app, 'DmsStack', {
-  context,
+const dmsProps = {
+  vpcId: ctx.vpcId,
+  subnetIds: ctx.subnetIds,
+  replicationSubnetGroupIdentifier: ctx.replicationSubnetGroupIdentifier,
+  replicationInstanceClass: ctx.replicationInstanceClass,
+  replicationInstanceIdentifier: ctx.replicationInstanceIdentifier,
+  tasks: ctx.tasks,
+  publiclyAccessible: ctx.publiclyAccessible,
+  stackName: `dms-cdk-stack`,
   env: {
-    account: context.account,
-    region: context.region,
+    region: ctx.region,
+    account: ctx.account,
   },
-});
+};
+
+new DmsStack(app, 'DmsStack', dmsProps);
