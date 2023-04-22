@@ -11,7 +11,7 @@
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.110.0",
+    "@aws-cdk/assert": "1.199.0",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/commit-analyzer": "8.0.1",
     "@semantic-release/git": "9.0.0",
@@ -28,11 +28,11 @@
     "typescript": "4.3.4"
   },
   "dependencies": {
-    "@aws-cdk/aws-dms": "1.110.0",
-    "@aws-cdk/aws-ec2": "1.110.0",
-    "@aws-cdk/aws-iam": "1.110.0",
-    "@aws-cdk/aws-sns": "1.110.0",
-    "@aws-cdk/aws-ssm": "1.110.0",
+    "@aws-cdk/aws-dms": "1.199.0",
+    "@aws-cdk/aws-ec2": "1.199.0",
+    "@aws-cdk/aws-iam": "1.199.0",
+    "@aws-cdk/aws-sns": "1.199.0",
+    "@aws-cdk/aws-ssm": "1.199.0",
     "@aws-cdk/core": "1.110.0"
   }
 }
