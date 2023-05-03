@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Rules } from './rules-props';
 
-export declare type TaskConfig = {
+export interface TaskConfig {
   name: string;
   /**
    * Secrets manager arn for the target database
@@ -36,9 +36,9 @@ export declare type TaskConfig = {
 
   /** Mapping or Transformation rules */
   tableMappings: Rules;
-};
+}
 
-export declare type DmsProps = cdk.StackProps & {
+export interface DmsProps extends cdk.StackProps {
   /**
    * Target VPC where CDK is provisioning the RDS instances and Security Groups
    */
@@ -75,4 +75,4 @@ export declare type DmsProps = cdk.StackProps & {
   engineVersion?: '3.4.6' | '3.4.7';
 
   allocatedStorage?: number;
-};
+}

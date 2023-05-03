@@ -13,7 +13,7 @@ import { Construct } from 'constructs';
 import { DmsProps } from './dms-props';
 import { TaskSettings } from '../conf/task_settings.json';
 import { Rules } from './rules-props';
-import { assert } from 'console';
+
 class DmsReplication extends Construct {
   private instance: dms.CfnReplicationInstance;
 
@@ -50,7 +50,7 @@ class DmsReplication extends Construct {
   }
 
   /**
-   * Creates IAM role to access secrets manager for setting up DMS endpoints.
+   * Creates IAM role to access secrets manager for provisioning DMS endpoints.
    *
    * @returns
    */
@@ -75,7 +75,7 @@ class DmsReplication extends Construct {
   }
 
   /**
-   * Creates replication instance where DMS replication tasks runs.
+   * Creates replication instance where DMS multiple DMS replication tasks runs.
    *
    * @param props
    * @returns
@@ -259,8 +259,7 @@ class DmsReplication extends Construct {
     migrationType: 'cdc' | 'full-load' | 'full-load-and-cdc',
     rules: Rules
   ): CfnReplicationTask {
-
-      const replicationTask = new CfnReplicationTask(this, replicationTaskIdentifier, {
+    const replicationTask = new CfnReplicationTask(this, replicationTaskIdentifier, {
       replicationInstanceArn: this.instance.ref,
       replicationTaskIdentifier,
       migrationType: migrationType || 'full-load',
