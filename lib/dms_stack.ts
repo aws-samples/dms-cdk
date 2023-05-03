@@ -18,7 +18,7 @@ class DmsStack extends cdk.Stack {
       let target;
 
       // endpoints cannot have underscore
-      const schemaName =task.name.includes('_') ? task.name.replace('_', '-') :task.name;
+      const schemaName = task.name.includes('_') ? task.name.replace('_', '-') : task.name;
 
       // source
       switch (task.engineName) {
